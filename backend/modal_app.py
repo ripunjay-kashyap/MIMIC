@@ -25,6 +25,7 @@ app = modal.App("mimic-backend")
 
 PUBLIC_URL = "https://ripun-j-kashyap--mimic-backend-web.modal.run"
 DEMO_HOST = "ripun-j-kashyap--mimic-backend-web.modal.run"
+GOLDEN_RUN_ID = "28c4437e-838d-48a9-89f5-c8e796813dd3"  # known-good deployed run; replace with the final rehearsal run
 
 
 @app.function(
@@ -36,6 +37,7 @@ DEMO_HOST = "ripun-j-kashyap--mimic-backend-web.modal.run"
         "ALLOW_LOCAL_TARGETS": "false",
         "DEMO_TARGET_HOSTS": DEMO_HOST,
         "GEMINI_MODE": "real",  # visual escalation + report synthesis (dev default is fake)
+        "GOLDEN_RUN_ID": GOLDEN_RUN_ID,
     },
     cpu=1.0,  # 1 physical core = 2 vCPU
     memory=4096,

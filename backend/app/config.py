@@ -46,10 +46,13 @@ class Settings(BaseSettings):
     # Targets / safety
     allowed_target_hosts: CsvList = Field(default_factory=list)  # empty = any public host
     demo_target_hosts: CsvList = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
-    allow_local_targets: bool = True  # dev only; set false on HF Space
+    allow_local_targets: bool = True  # dev only; Modal sets false
 
     # Runtime
     max_concurrent_personas: int = 6
+    runs_per_ip_per_hour: int = 6  # swarm deploys per client IP (creates allowed 3x this)
+    runs_global_per_hour: int = 15
+    golden_run_id: str = ""  # known-good completed run, shown as a fallback during judging
     screenshot_mode: Literal["key", "all", "none"] = "key"
     browser_headless: bool = True
 

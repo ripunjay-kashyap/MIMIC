@@ -3,10 +3,12 @@
 import asyncio
 import json
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 
+from app.api.ratelimit import limit_runs
+from app.config import get_settings
 from app.db.repo import get_repo
 from app.models.schemas import CreateRunRequest, RunEvent, RunSummary
 from app.orchestrator.run_manager import RunNotFound, manager
@@ -17,12 +19,22 @@ WAIT_FOR_START_S = 15 * 60
 LIVE_POLL_S = 15
 
 
-@router.post("", response_model=RunSummary)
+@router.get("/golden")
+async def golden_run() -> dict:
+    """A known-good completed run for judges/demo fallback (GOLDEN_RUN_ID)."""
+    rid = get_settings().golden_run_id
+    row = await get_repo().get_run(rid) if rid else None
+    if not row or row["status"] != "completed":
+        return JSONResponse({"detail": "No golden run configured."}, status_code=404)
+    return {"run_id": rid, "goal": row["goal"], "target_url": row["target_url"], "completed_at": row.get("completed_at")}
+
+
+@router.post("", response_model=RunSummary, dependencies=[Depends(limit_runs("create"))])
 async def create_run(req: CreateRunRequest) -> RunSummary:
     return await manager.create_run(req)
 
 
-@router.post("/{run_id}/start", status_code=202)
+@router.post("/{run_id}/start", status_code=202, dependencies=[Depends(limit_runs("start"))])
 async def start_run(run_id: str) -> dict:
     await manager.start_run(run_id)
     return {"run_id": run_id, "status": "running"}

@@ -1,4 +1,4 @@
-# Hugging Face Space (Docker SDK). Playwright image tag MUST match playwright in requirements.txt.
+# Container image for any Docker host (production uses modal_app.py). Playwright tag MUST match requirements.txt.
 FROM mcr.microsoft.com/playwright/python:v1.63.0-noble
 
 ENV PYTHONUNBUFFERED=1 \

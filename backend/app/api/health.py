@@ -24,3 +24,14 @@ async def health() -> HealthResponse:
         db_ready=db_ok,
         llm_mode=settings.llm_mode,
     )
+
+
+@router.get("/health/quota")
+async def quota() -> dict:
+    """Remaining Gemini requests today per model (for demo-day checks). Counts only, no keys."""
+    from app.llm.gemini_pool import gemini_pool
+
+    pool = gemini_pool()
+    await pool._load_counts()
+    return {"gemini_remaining": pool.remaining(), "llm_mode": get_settings().llm_mode,
+            "gemini_mode": get_settings().gemini_mode}

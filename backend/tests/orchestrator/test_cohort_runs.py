@@ -22,6 +22,8 @@ async def env(pool, monkeypatch):
     monkeypatch.setattr(s, "allow_local_targets", True)
     repo = MemoryRepo()
     set_repo(repo)
+    from app.api import ratelimit
+    ratelimit.reset()
     manager = RunManager()
     monkeypatch.setattr(rm, "pool", pool)
     monkeypatch.setattr(runs_api, "manager", manager)
@@ -174,3 +176,27 @@ async def test_orphaned_runs_marked_failed(env):
     await repo.insert_run({"id": "orphan", "target_url": "x", "goal": "g", "status": "running", "created_at": "t"})
     await manager.recover_orphans()
     assert (await repo.get_run("orphan"))["status"] == "failed"
+
+
+async def test_rate_limit_and_golden_run(env, demo_site_url, monkeypatch):
+    client, manager, repo, _ = env
+    s = get_settings()
+    monkeypatch.setattr(s, "runs_per_ip_per_hour", 1)
+    ids = []
+    for _ in range(3):  # creates allowed 3x the start limit
+        r = await client.post("/runs", json=body(demo_site_url), headers={"x-forwarded-for": "1.2.3.4"})
+        assert r.status_code == 200
+        ids.append(r.json()["run_id"])
+    r = await client.post("/runs", json=body(demo_site_url), headers={"x-forwarded-for": "1.2.3.4"})
+    assert r.status_code == 429 and "Retry-After" in r.headers
+    # A different client is unaffected.
+    assert (await client.post("/runs", json=body(demo_site_url), headers={"x-forwarded-for": "5.6.7.8"})).status_code == 200
+
+    assert (await client.post(f"/runs/{ids[0]}/start", headers={"x-forwarded-for": "1.2.3.4"})).status_code == 202
+    await manager.wait(ids[0])
+    assert (await client.post(f"/runs/{ids[1]}/start", headers={"x-forwarded-for": "1.2.3.4"})).status_code == 429
+
+    assert (await client.get("/runs/golden")).status_code == 404
+    monkeypatch.setattr(s, "golden_run_id", ids[0])
+    g = (await client.get("/runs/golden")).json()
+    assert g["run_id"] == ids[0]
