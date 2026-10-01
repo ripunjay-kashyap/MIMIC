@@ -1,1 +1,53 @@
+# ---------------------------------------------------------------- secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---------------------------------------------------------------- dev notes / planning (never pushed)
+MIMIC_GhostQA_Project_Spec.md
+implementation_plan.md
+AGENTS.md
+CLAUDE.md
+docs/
+task.md
+system_architecture.md
+.cursorrules
+*.notes.md
+NOTES.md
+TODO.md
+
+# ---------------------------------------------------------------- editor / agent tooling
 MIMIC.code-workspace
+.claude/
+.codex/
+.vscode/
+.idea/
+.DS_Store
+
+# ---------------------------------------------------------------- python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# ---------------------------------------------------------------- node / next
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+
+# ---------------------------------------------------------------- runtime artifacts
+screenshots/
+playwright-report/
+test-results/
+*.log
