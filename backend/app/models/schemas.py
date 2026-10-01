@@ -62,6 +62,7 @@ class PersonaState(BaseModel):
     progress: float = 0.0
     progress_estimated: bool = False
     visited_paths: list[str] = Field(default_factory=list)
+    recent_hashes: list[str] = Field(default_factory=list)  # last few page_hashes, for "stuck" detection
     task_status: TaskStatus = "pending"
     termination_reason: str | None = None
 

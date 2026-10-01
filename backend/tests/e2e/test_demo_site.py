@@ -171,7 +171,7 @@ def test_deterministic_confirmation(browser, demo_url):
 
 def test_seeded_issue_ground_truth():
     issues = json.loads((DEMO_DIR / "SEEDED_ISSUES.json").read_text())
-    allowed = {"stuck_on_page", "backtrack", "repeated_failure", "invalid_input_accepted", "abandon_point", "risk_hesitation", "long_path", "dead_end", "duplicate_submit_effect", "delayed_feedback", "route_divergence"}
+    allowed = {"stuck_on_page", "backtrack", "repeated_failure", "invalid_input_accepted", "abandon_point", "risk_hesitation", "long_path", "dead_end", "duplicate_submit_effect", "delayed_feedback", "route_divergence", "generic_error_message", "prechecked_consent"}
     assert len(issues) == 13
     assert {issue["id"] for issue in issues} == {f"D{n}" for n in range(1, 13)} | {"D2b"}
     for issue in issues:
