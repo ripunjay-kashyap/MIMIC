@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Your details | SurakshaSetu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body data-page="details">
+<header class="site-header"><div class="header-inner">
+  <a class="brand" href="index.html" aria-label="SurakshaSetu home"><span class="brand-mark" aria-hidden="true">S</span>SurakshaSetu</a>
+  <nav aria-label="Main navigation"><a href="index.html">Home</a><a href="explore.html">Plans</a><a href="claims.html">Claims</a><a href="help.html">Help</a></nav>
+</div></header>
+<main ><section class="panel form-panel"><p class="eyebrow">LET'S GET TO KNOW YOU</p><h1>Your details</h1><p>Selected plan: <strong data-plan-name></strong></p>
+<form id="details-form" novalidate><p id="details-error" class="error" role="alert" hidden>Invalid input</p>
+<label for="full-name">Full name</label><input id="full-name" name="name" type="text" autocomplete="name">
+<label for="mobile">Mobile number</label><input id="mobile" name="mobile" type="tel" autocomplete="tel-national">
+<label for="pin">PIN code</label><input id="pin" name="pin" type="text" inputmode="numeric" autocomplete="postal-code">
+<label for="dob">Date of birth</label><input id="dob" name="dob" type="text" placeholder="DD/MM/YYYY" autocomplete="bday">
+<button type="submit">Continue</button></form></section></main>
+<footer class="site-footer"><span>SurakshaSetu · A little certainty for every family.</span><small>Fictional insurance demo · 2026</small></footer>
+</body>
+</html>

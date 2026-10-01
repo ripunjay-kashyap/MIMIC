@@ -1,0 +1,148 @@
+[
+  {
+    "id": "D1",
+    "page": "index.html",
+    "category": "ambiguous_cta",
+    "detectable_by": "text",
+    "description": "Three similarly worded CTAs ('Get Started', 'Get a Quote', 'Explore Plans') plus a header 'Plans' link that leads to a comparison page with no purchase action; only 'Get a Quote' leads to purchase.",
+    "expected_signals": [
+      "backtrack",
+      "long_path",
+      "route_divergence"
+    ]
+  },
+  {
+    "id": "D2",
+    "page": "learn.html",
+    "category": "navigation_dead_end",
+    "detectable_by": "behavior",
+    "description": "The long article has no links, buttons or header; only browser Back escapes.",
+    "expected_signals": [
+      "stuck_on_page",
+      "backtrack",
+      "dead_end",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D2b",
+    "page": "explore.html",
+    "category": "secondary_dead_end",
+    "detectable_by": "behavior",
+    "description": "Comparison has no purchase action; the advisor button only reports busy advisors.",
+    "expected_signals": [
+      "stuck_on_page",
+      "backtrack",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D3",
+    "page": "plans.html",
+    "category": "unexplained_jargon",
+    "detectable_by": "text",
+    "description": "All plan cards use insurance jargon with no explanation or tooltips.",
+    "expected_signals": [
+      "risk_hesitation",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D4",
+    "page": "details.html",
+    "category": "invalid_input_accepted",
+    "detectable_by": "behavior",
+    "description": "Mobile validation accepts any string containing at least five digits instead of exactly ten.",
+    "expected_signals": [
+      "invalid_input_accepted"
+    ]
+  },
+  {
+    "id": "D5",
+    "page": "details.html",
+    "category": "poor_error_message",
+    "detectable_by": "text",
+    "description": "All invalid fields produce only 'Invalid input', without identifying or highlighting the field.",
+    "expected_signals": [
+      "repeated_failure",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D6",
+    "page": "verify.html",
+    "category": "delayed_feedback",
+    "detectable_by": "behavior",
+    "description": "Sending OTP has no visible effect for three seconds; repeat clicks restart the delay.",
+    "expected_signals": [
+      "delayed_feedback",
+      "repeated_failure",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D7",
+    "page": "verify.html",
+    "category": "hidden_next_step",
+    "detectable_by": "text",
+    "description": "The OTP form is initially hidden and the test OTP is disclosed only in small footer text.",
+    "expected_signals": [
+      "stuck_on_page",
+      "repeated_failure",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D8",
+    "page": "review.html",
+    "category": "unnecessary_step",
+    "detectable_by": "behavior",
+    "description": "A separate confirmation step repeats the previously entered application details.",
+    "expected_signals": [
+      "long_path"
+    ]
+  },
+  {
+    "id": "D9",
+    "page": "pay.html",
+    "category": "confusing_payment_wording",
+    "detectable_by": "text",
+    "description": "The total has unexplained applicable charges and an asterisk; the action is only 'Proceed'.",
+    "expected_signals": [
+      "risk_hesitation",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D10",
+    "page": "pay.html",
+    "category": "prechecked_consent",
+    "detectable_by": "text",
+    "description": "Auto-renewal and partner data sharing are bundled in a pre-checked checkbox.",
+    "expected_signals": [
+      "risk_hesitation",
+      "abandon_point"
+    ]
+  },
+  {
+    "id": "D11",
+    "page": "pay.html",
+    "category": "duplicate_submit",
+    "detectable_by": "behavior",
+    "description": "Every Proceed click records a payment before a delayed redirect; double-clicking records two payments.",
+    "expected_signals": [
+      "duplicate_submit_effect"
+    ]
+  },
+  {
+    "id": "D12",
+    "page": "index.html",
+    "category": "mobile_layout",
+    "detectable_by": "visual",
+    "description": "At widths up to 400px the hero image has a minimum height of 100vh, pushing all CTAs below the fold.",
+    "expected_signals": [
+      "stuck_on_page",
+      "abandon_point"
+    ]
+  }
+]
