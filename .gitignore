@@ -51,3 +51,6 @@ screenshots/
 playwright-report/
 test-results/
 *.log
+
+# handoff notes
+PROJECT_HANDOFF.md
