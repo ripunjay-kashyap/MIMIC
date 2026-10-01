@@ -149,15 +149,15 @@ class GeminiPool:
         if json_output:
             body["generationConfig"]["responseMimeType"] = "application/json"
 
-        deadline = time.monotonic() + max_wait_s
         last_error = "no candidate with budget"
+        overloaded: set[str] = set()  # a 503 is model-wide: don't burn other keys' quota on the same model
         for p in self._candidates(task):
-            if not p.has_daily_budget() or time.monotonic() < p.cooldown_until:
+            if p.model in overloaded or not p.has_daily_budget() or time.monotonic() < p.cooldown_until:
                 continue
-            for attempt in range(2):  # one retry on 503
+            for attempt in range(1):
                 async with self._lock:
                     wait = p.rpm_wait()
-                    if time.monotonic() + wait > deadline:
+                    if wait > max_wait_s:  # would wait too long for this pair's RPM window: try the next one
                         break
                     if wait:
                         await asyncio.sleep(wait)
@@ -181,9 +181,9 @@ class GeminiPool:
                     return GeminiResult(text=text, model=p.model, key_hash=p.key_hash,
                                         prompt_tokens=u.get("promptTokenCount", 0), output_tokens=u.get("candidatesTokenCount", 0))
                 last_error = f"{p.model}: HTTP {resp.status_code}"
-                if resp.status_code == 503 and attempt == 0:
-                    await asyncio.sleep(2)
-                    continue
+                if resp.status_code in (500, 503):
+                    overloaded.add(p.model)
+                    log.info("gemini %s overloaded (%s); trying next model", p.model, resp.status_code)
                 if resp.status_code == 429:
                     p.cooldown_until = time.monotonic() + 60
                 break

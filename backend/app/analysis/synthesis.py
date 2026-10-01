@@ -17,7 +17,9 @@ MAX_FINDINGS = 12
 SYSTEM = (
     "You are a senior UX researcher reviewing evidence from SYNTHETIC users (AI agents with behavioural profiles) "
     "who tried a task on a website. You never claim confirmed bugs or real-user behaviour. Use hedged language "
-    "('may', 'could', 'suggests'). Be concrete and specific to the page and evidence. No marketing tone."
+    "('may', 'could', 'suggests'). Be concrete and specific to the page and evidence. No marketing tone. "
+    "Quote persona counts exactly as given (e.g. '1 of 6 agents'); never call something 'high', 'frequent' or "
+    "'many' when only one persona is involved. Name the persona type when only one is involved."
 )
 
 PROMPT = """Task the synthetic users attempted: {goal}
@@ -39,9 +41,9 @@ def _outcomes(personas: list[PersonaState]) -> str:
                      for p in personas)
 
 
-def _findings(findings: list[Finding]) -> str:
-    return "\n".join(f"[{i}] {f.category} on {f.page or 'whole journey'} ({f.severity}; personas: {', '.join(f.personas)}): "
-                     f"{f.observed}" for i, f in enumerate(findings))
+def _findings(findings: list[Finding], total: int) -> str:
+    return "\n".join(f"[{i}] {f.category} on {f.page or 'whole journey'} ({f.severity}; {len(f.personas)} of {total} personas: "
+                     f"{', '.join(f.personas)}): {f.observed}" for i, f in enumerate(findings))
 
 
 async def synthesize(goal: str, personas: list[PersonaState], findings: list[Finding]) -> list[Finding]:
@@ -49,7 +51,7 @@ async def synthesize(goal: str, personas: list[PersonaState], findings: list[Fin
         return findings
     head, tail = findings[:MAX_FINDINGS], findings[MAX_FINDINGS:]
     res = await gemini_pool().generate(
-        "synthesis", PROMPT.format(goal=goal, outcomes=_outcomes(personas), findings=_findings(head)),
+        "synthesis", PROMPT.format(goal=goal, outcomes=_outcomes(personas), findings=_findings(head, len(personas))),
         system=SYSTEM, json_output=True, max_output_tokens=4096, max_wait_s=40)
     data = json.loads(res.text)
     items = data.get("findings", data) if isinstance(data, dict) else data

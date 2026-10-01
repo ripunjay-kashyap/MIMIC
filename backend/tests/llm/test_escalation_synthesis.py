@@ -107,3 +107,34 @@ async def test_synthesis_fake_mode_is_noop(monkeypatch):
     monkeypatch.setattr(get_settings(), "gemini_mode", "fake")
     fs = [finding(0)]
     assert await synthesis.synthesize("goal", [persona()], fs) == fs
+
+
+async def test_pool_skips_overloaded_model_and_counts_every_request(monkeypatch):
+    import httpx
+
+    from app.llm import gemini_pool as gp
+
+    s = get_settings()
+    monkeypatch.setattr(s, "gemini_api_keys", ["k1", "k2", "k3"])
+    monkeypatch.setattr(s, "gemini_models", ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash-lite"])
+
+    async def no_db():
+        return None
+
+    monkeypatch.setattr(gp, "get_db", no_db)
+    calls = []
+
+    def handler(request: httpx.Request):
+        model = request.url.path.split("/models/")[1].split(":")[0]
+        calls.append((model, request.headers["x-goog-api-key"]))
+        if model == "gemini-3.8-flash":
+            return httpx.Response(503, json={"error": {"code": 503}})
+        return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": "ok"}]}}],
+                                         "usageMetadata": {"promptTokenCount": 3, "candidatesTokenCount": 1}})
+
+    pool = gp.GeminiPool()
+    pool._http = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    res = await pool.generate("visual", "describe")
+    assert res.model == "gemini-3.7-flash"
+    assert [m for m, _ in calls].count("gemini-3.8-flash") == 1  # not retried on the other two keys
+    assert sum(p.day_count for p in pool.pairs) == 2  # the failed 503 still counted
