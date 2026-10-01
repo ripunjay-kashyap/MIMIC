@@ -1,0 +1,49 @@
+# MIMIC × Ghost
+
+> Your first users shouldn't be your testers. MIMIC is a multi-agent synthetic usability testing tool: six AI personas with different, code-enforced behaviours go through your site in parallel, each in its own isolated browser, and MIMIC shows where they got stuck, with evidence for every finding.
+
+The web app needs JavaScript and a backend that may take 30–60 s to wake up on free hosting. This file and the GitHub README describe the project in plain text.
+
+## What it does
+
+1. Configure: a target URL, a goal ("buy a policy") and optional success criteria, plus an authorization confirmation.
+2. Cohort: six personas, each with explicit traits, an action budget and a frustration threshold.
+   - Impatient: small budget, low patience, never waits, quits early when blocked (qwen3.8-27b on Groq)
+   - Low digital literacy: only sees controls with visible text labels; error messages frustrate it more (Gemini 3.5 Flash-Lite)
+   - Power user: shortest path, no browsing; its path length shows wasted steps (qwen3.8-27b)
+   - Cautious: must check fees and terms before committing on payment, OTP or consent pages (gpt-oss-120b on Groq)
+   - Explorer: opens secondary paths and backtracks without frustration (Gemini 3.5 Flash-Lite)
+   - Chaos: edge-case inputs (12345, Devanagari digits, emoji), double-clicks, going back mid-flow (gpt-oss-120b)
+3. Swarm: six parallel Playwright browser contexts with no shared cookies or storage; every step streams live over server-sent events and a journey map draws each route.
+4. Report: deterministic metrics (completion, abandonment, average and median actions, unique paths, backtracks) and findings split into Observed → Evidence → Interpretation → Suggested investigation. Model-written interpretations are labelled as AI-written.
+5. Replay: step by step, what the persona saw, what it decided and why, what happened, how its state changed, and screenshots.
+
+## Agentic loop
+
+observe page (compact text: headings, messages, numbered element menu) → reason as persona (LLM picks ONE action from the menu as JSON; it cannot invent selectors) → persona policy (code-enforced behaviour) → act (Playwright) → update state (deterministic rules: frustration, progress, budget, journey memory) → continue | success | abandoned | failed | budget exhausted | blocked by verification.
+
+Code owns state, the LLM owns choices. The model can't end its own journey by claiming "done": success is checked against the criteria. Findings come from 13 deterministic friction detectors over stored events; the LLM only rewrites interpretation text and cannot add findings or change evidence.
+
+## Measured results
+
+Tested against SurakshaSetu, a fictional health-insurance onboarding site we built with 13 documented usability defects (12 detectable from text and behaviour), so results are scored against ground truth.
+
+Recorded demo run: 2 min 54 s with six personas in parallel; 2 reached the goal (Power, Cautious), 3 gave up (Impatient, Low literacy, Explorer), 1 ran out of actions (Chaos); 5 different routes; 11 findings, each linked to events and screenshots; 6 of 12 seeded defects found; 0 errors. Three of six personas gave up on the same mobile OTP page, which has two seeded defects (silent 3 s OTP, code shown only in small footer text). Across six scored runs during development, MIMIC found 42–83% of seeded defects.
+
+## Architecture
+
+Next.js UI (Vercel) → HTTPS + SSE → FastAPI on Modal: run orchestrator with 6 LangGraph persona loops; one Chromium with 6 isolated contexts; model router (Groq for decisions, Gemini for decisions, fallback, screenshot reading and report wording, with per-model token-bucket rate limiting); event bus to Supabase; analysis (metrics, 13 friction detectors, clustering); tracing to LangSmith.
+
+## Safety
+
+Authorization checkbox on every run; private and loopback targets rejected (SSRF guard); navigation fenced to the target host; irreversible actions blocked except on our demo site; CAPTCHA and Cloudflare challenges end the persona with no bypass; rate limits on starting runs.
+
+## Links
+
+- [Source code and README](https://github.com/ripunjay-kashyap/MIMIC)
+- [Live app](https://mimic-teal-one.vercel.app)
+- [Case study: one recorded run told as a story](https://mimic-teal-one.vercel.app/case-study)
+- [Report of the recorded run](https://mimic-teal-one.vercel.app/runs/327ebf9a-51ef-485f-b8f6-44d083a27d81/report)
+- [API documentation (OpenAPI)](https://ripun-j-kashyap--mimic-backend-web.modal.run/docs)
+- [Seeded demo site](https://ripun-j-kashyap--mimic-backend-web.modal.run/demo/)
+- [Public LangSmith trace of the Cautious persona](https://smith.langchain.com/public/2542d900-ca97-4bee-9373-2d65a8eaaa8d/r)

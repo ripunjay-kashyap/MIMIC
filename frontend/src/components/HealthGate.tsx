@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { getHealth } from "@/lib/api";
 import { PersonaSprite, personaTypes } from "./PersonaSprite";
 
-export function HealthGate({ children }: { children: React.ReactNode }) {
+export function HealthGate({ children, brief }: { children: React.ReactNode; brief?: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [initializing, setInitializing] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -38,5 +38,5 @@ export function HealthGate({ children }: { children: React.ReactNode }) {
     {!initializing && elapsed >= 3 && <p>Free hosting can take 30–60 seconds to wake up.</p>}
     <p className="timer">{elapsed} seconds elapsed</p>
     <p className="muted">This page opens on its own when everything is ready.</p>
-  </section></div>;
+  </section>{brief}</div>;
 }

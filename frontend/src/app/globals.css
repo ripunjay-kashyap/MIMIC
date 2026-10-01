@@ -145,6 +145,12 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .gate { min-height: 62vh; display: grid; place-items: center; text-align: center; }
 .gate-card { max-width: 600px; }
 .gate-cast { justify-content: center; margin: 0 0 28px !important; }
+.gate { gap: 40px; }
+.brief { max-width: 720px; text-align: left; border-top: 1px solid var(--line); padding-top: 28px; font-size: 15px; }
+.brief h2 { font-size: 22px; margin: 0 0 12px; }
+.brief h3 { font-size: 16px; margin: 20px 0 8px; }
+.brief ul { padding-left: 20px; margin: 0; }
+.brief li { margin: 4px 0; }
 .gate h1 { font-size: clamp(30px, 3.2vw, 40px); }
 .timer { font-family: var(--serif); font-size: 26px; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
 
