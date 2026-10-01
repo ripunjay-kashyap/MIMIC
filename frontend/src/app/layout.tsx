@@ -11,7 +11,7 @@ const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", axes: [
 
 export const metadata: Metadata = {
   title: "MIMIC × Ghost",
-  description: "Ship to synthetic users before real users. Six perspectives. Every step, evidenced.",
+  description: "Your first users shouldn’t be your testers. Six AI personas test your site before launch, with evidence for every finding.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

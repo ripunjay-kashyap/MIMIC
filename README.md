@@ -1,6 +1,8 @@
 # MIMIC × Ghost
 
-**Ship to synthetic users before real users.**
+**Your first users shouldn't be your testers.**
+
+MIMIC sends six AI personas with different behaviours through your site and shows you where they got stuck, with the evidence.
 
 MIMIC deploys a cohort of six behaviourally distinct AI users onto a live website. Each one gets its own isolated browser, its own state, and the same goal ("buy a policy", "book an appointment"). They work in parallel, and MIMIC records every step, groups the friction they hit into evidence-backed findings, and lets you replay any persona's journey screen by screen.
 

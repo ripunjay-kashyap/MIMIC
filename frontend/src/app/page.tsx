@@ -41,7 +41,7 @@ export default function Setup() {
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero-copy">
         <p className="kicker">Synthetic usability testing</p>
-        <h1 id="hero-title" className="display">Ship to synthetic users <em>before real users.</em></h1>
+        <h1 id="hero-title" className="display">Your first users <em>shouldn’t be your testers.</em></h1>
         <p className="lead">Give six AI personas the same goal on your website, each in its own browser. See where they go and where they get stuck, then replay the steps behind every finding.</p>
         <ul className="cast" aria-label="The six personas">
           {personaTypes.map((type, index) => (
