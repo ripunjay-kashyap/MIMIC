@@ -1,4 +1,4 @@
-# MIMIC × GhostQA
+# MIMIC × Ghost
 
 **Ship to synthetic users before real users.**
 

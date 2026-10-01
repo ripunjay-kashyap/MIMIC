@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="MIMIC × GhostQA", version=settings.version, lifespan=lifespan)
+    app = FastAPI(title="MIMIC × Ghost", version=settings.version, lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,

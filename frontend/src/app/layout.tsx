@@ -10,7 +10,7 @@ const sans = Figtree({ subsets: ["latin"], variable: "--font-figtree", display: 
 const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", axes: ["opsz"], style: ["normal", "italic"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "MIMIC × GhostQA",
+  title: "MIMIC × Ghost",
   description: "Ship to synthetic users before real users. Six perspectives. Every step, evidenced.",
 };
 
@@ -21,9 +21,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a href="#main" className="skip-link">Skip to content</a>
         <header className="site-header">
           <div className="shell header-inner">
-            <Link className="brand" href="/" aria-label="MIMIC × GhostQA home">
+            <Link className="brand" href="/" aria-label="MIMIC × Ghost home">
               <PersonaSprite size={34} />
-              <span className="brand-name">MIMIC <span>× GhostQA</span></span>
+              <span className="brand-name">MIMIC <span>× Ghost</span></span>
             </Link>
             <nav className="header-links" aria-label="Main navigation">
               {MOCK && <span className="mock-label">Mock mode</span>}
@@ -34,7 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </header>
         <main id="main" className="shell main"><HealthGate>{children}</HealthGate></main>
         <footer className="shell footer">
-          <span>MIMIC × GhostQA. Evidence before intuition.</span>
+          <span>MIMIC × Ghost. Evidence before intuition.</span>
           <span>Synthetic observations, human judgment.</span>
         </footer>
       </body>

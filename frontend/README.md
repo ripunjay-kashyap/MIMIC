@@ -1,4 +1,4 @@
-# MIMIC × GhostQA frontend
+# MIMIC × Ghost frontend
 
 Next.js App Router, TypeScript and Tailwind. All application work is inside `frontend/`.
 
