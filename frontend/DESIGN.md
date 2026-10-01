@@ -2,7 +2,7 @@
 
 - Concept: a warm, editorial field notebook. Six friendly characters try the same task; the product reads like a well-made report about real people's afternoons, not a control room.
 - Palette: light only. Warm paper (`#FBF8F3`), deep ink (`#221E1A`), and one terracotta accent for emphasis. Color carries meaning: each persona owns one hue, and severity uses brick (high), ochre (medium) and stone (low). Body text is always ink or warm gray (AA or better). Persona hues mark lines, dots and avatars, never body text.
-- Type: Fraunces (soft, optical-size serif) for headlines, big numbers and quotes; Figtree for everything you read or click. No monospace as decoration; it appears only in the raw event log and typed input.
+- Type: Newsreader (warm optical-size editorial serif) for headlines, big numbers and quotes; Figtree for everything you read or click. No monospace as decoration; it appears only in the raw event log and typed input.
 - Layout: generous whitespace and hairline dividers instead of boxes. White surfaces are reserved for the few objects you work with: the setup form, the journey map, persona cards and the AI-written part of a finding. Buttons are ink pills; secondary actions are quiet outlines or text links.
 - Characters: six hand-drawn vector ghosts with faces and one prop each (stopwatch, reading glasses, lightning bolt, shield, explorer's hat, scribble). They are the human touch, and they are the legend: wherever a persona hue appears, its face sits next to it.
 - Truth: every number, route, marker, quote and screenshot comes from recorded events or findings. Persona quotes are model-written reasoning and are labelled as such. Interpretation and suggested investigation sit in a tinted panel marked "AI-written, verify".

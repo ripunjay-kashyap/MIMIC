@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree, Fraunces } from "next/font/google";
+import { Figtree, Newsreader } from "next/font/google";
 import Link from "next/link";
 import { HealthGate } from "@/components/HealthGate";
 import { PersonaSprite } from "@/components/PersonaSprite";
@@ -7,7 +7,7 @@ import { MOCK } from "@/lib/config";
 import "./globals.css";
 
 const sans = Figtree({ subsets: ["latin"], variable: "--font-figtree", display: "swap" });
-const serif = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", axes: ["SOFT", "opsz"], style: ["normal", "italic"], display: "swap" });
+const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", axes: ["opsz"], style: ["normal", "italic"], display: "swap" });
 
 export const metadata: Metadata = {
   title: "MIMIC × GhostQA",

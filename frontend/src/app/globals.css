@@ -24,7 +24,7 @@
   --violet-soft: #ece6f7;
   --focus: #2c5fa8;
   --sans: var(--font-figtree), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --serif: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
+  --serif: var(--font-serif), ui-serif, Georgia, "Times New Roman", serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --radius: 14px;
   --radius-lg: 22px;
@@ -49,7 +49,7 @@ a { color: var(--ink); text-decoration-color: var(--line-strong); text-underline
 a:hover { text-decoration-color: currentColor; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
 h1, h2, h3, h4, p { margin-top: 0; }
-h1, h2 { font-family: var(--serif); font-weight: 560; letter-spacing: -.02em; font-variation-settings: "SOFT" 50; text-wrap: balance; }
+h1, h2 { font-family: var(--serif); font-weight: 560; letter-spacing: -.02em; text-wrap: balance; }
 h1 { font-size: clamp(36px, 4.2vw, 54px); line-height: 1.06; margin-bottom: 14px; }
 h2 { font-size: clamp(26px, 2.4vw, 32px); line-height: 1.15; margin-bottom: 12px; }
 h3 { font-size: 18px; font-weight: 650; line-height: 1.35; margin-bottom: 8px; }
@@ -67,7 +67,7 @@ img, svg { max-width: 100%; }
 body:has(.run-page) .shell { max-width: 1600px; }
 body:has(.report) .shell, body:has(.story) .shell { max-width: 1400px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
-.brand-name { font-family: var(--serif); font-size: 23px; font-weight: 620; letter-spacing: -.02em; font-variation-settings: "SOFT" 60; }
+.brand-name { font-family: var(--serif); font-size: 23px; font-weight: 620; letter-spacing: -.02em; }
 .brand-name span { font-family: var(--sans); font-size: 16px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
 .header-links { display: flex; align-items: center; gap: 22px; font-size: 15.5px; font-weight: 550; }
 .header-links a { text-decoration: none; }
@@ -198,7 +198,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .meet, .how { margin-top: 112px; }
 .meet-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 28px; padding: 0; margin: 0; list-style: none; }
 .meet-grid li { border-top: 3px solid var(--persona-color); padding-top: 18px; }
-.meet-grid h3 { font-family: var(--serif); font-size: 21px; font-weight: 560; margin: 10px 0 6px; font-variation-settings: "SOFT" 50; }
+.meet-grid h3 { font-family: var(--serif); font-size: 21px; font-weight: 560; margin: 10px 0 6px; }
 .meet-grid p { font-size: 15.5px; color: var(--ink-2); margin: 0; }
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; padding: 0; margin: 0; list-style: none; counter-reset: step; }
 .steps li { counter-increment: step; }
@@ -210,7 +210,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .run-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 26px; }
 .run-title { min-width: 0; }
 .run-title h1 { margin-bottom: 8px; }
-.run-goal { font-family: var(--serif); font-size: 21px; line-height: 1.4; max-width: 46em; margin-bottom: 6px; font-variation-settings: "SOFT" 50; }
+.run-goal { font-family: var(--serif); font-size: 21px; line-height: 1.4; max-width: 46em; margin-bottom: 6px; }
 .run-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex: none; text-align: right; }
 .toolbar-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px 18px; font-size: 15px; color: var(--ink-2); }
 .connection { font-size: 14px; color: var(--ink-2); }
@@ -320,7 +320,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 
 /* ---------- Report ---------- */
 .report-header { max-width: 900px; margin-bottom: 34px; }
-.report-dek { font-family: var(--serif); font-size: clamp(25px, 2.5vw, 34px); line-height: 1.25; font-weight: 440; margin: 0; font-variation-settings: "SOFT" 50; }
+.report-dek { font-family: var(--serif); font-size: clamp(25px, 2.5vw, 34px); line-height: 1.25; font-weight: 440; margin: 0; }
 .metrics-block { margin-bottom: 48px; padding: 26px 0 22px; border-block: 1px solid var(--line); }
 .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px; margin: 0; }
 .metric { display: flex; flex-direction: column-reverse; gap: 6px; }
@@ -341,7 +341,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .finding { padding: 30px 0 32px; border-top: 1px solid var(--line); scroll-margin-top: 24px; }
 .finding:target { box-shadow: inset 4px 0 0 var(--accent); padding-left: 22px; }
 .finding-heading { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 20px; }
-.finding-heading h3 { font-family: var(--serif); font-size: 27px; font-weight: 560; letter-spacing: -.015em; margin: 0; font-variation-settings: "SOFT" 50; }
+.finding-heading h3 { font-family: var(--serif); font-size: 27px; font-weight: 560; letter-spacing: -.015em; margin: 0; }
 .finding-page { margin: 0; font-size: 15px; color: var(--ink-2); }
 .finding-page .url-path { font-size: 15px; color: var(--ink); }
 .finding-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; align-items: start; }
@@ -367,7 +367,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .outcome { margin-bottom: 34px; padding: 26px 0; border-block: 1px solid var(--line); }
 .outcome-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 6px; }
 .outcome-head h2 { font-size: 26px; margin: 0; }
-.outcome-reason { font-family: var(--serif); font-size: 21px; line-height: 1.4; margin-bottom: 20px; font-variation-settings: "SOFT" 50; }
+.outcome-reason { font-family: var(--serif); font-size: 21px; line-height: 1.4; margin-bottom: 20px; }
 .outcome-metrics { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
 .outcome-metrics .bar-field { margin: 0; }
 .outcome-actions { margin: 0; font-size: 15px; color: var(--ink-2); }
@@ -395,7 +395,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .observation-prompt pre { max-height: 320px; overflow: auto; margin: 8px 0 0; padding: 14px; border-radius: 12px; background: var(--paper-2); white-space: pre-wrap; font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
 .decision-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .decision-heading h3 { margin: 0; font-size: 16px; }
-.replay-thought { margin: 10px 0; padding-left: 16px; border-left: 3px solid var(--persona-color, var(--accent)); font-family: var(--serif); font-size: 20px; font-style: italic; line-height: 1.45; font-variation-settings: "SOFT" 50; }
+.replay-thought { margin: 10px 0; padding-left: 16px; border-left: 3px solid var(--persona-color, var(--accent)); font-family: var(--serif); font-size: 20px; font-style: italic; line-height: 1.45; }
 .typed-text { font-size: 15px; margin-bottom: 6px; }
 .typed-text code { font-family: var(--mono); font-size: 14px; padding: 2px 7px; border-radius: 6px; background: var(--paper-2); }
 .model-original { font-size: 14px; margin-bottom: 6px; }
@@ -423,14 +423,14 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .story { max-width: 1320px; margin: 0 auto; }
 .story-hero { max-width: 1000px; margin: 0 auto; padding-top: 16px; text-align: center; }
 .story-hero .display { margin-bottom: 22px; }
-.story-goal { max-width: 780px; margin: 0 auto 14px; font-family: var(--serif); font-size: clamp(21px, 2.1vw, 27px); font-style: italic; line-height: 1.4; font-variation-settings: "SOFT" 50; }
+.story-goal { max-width: 780px; margin: 0 auto 14px; font-family: var(--serif); font-size: clamp(21px, 2.1vw, 27px); font-style: italic; line-height: 1.4; }
 .story-meta { font-size: 15px; color: var(--ink-2); }
 .story-cast { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin: 44px 0 34px; padding: 0; list-style: none; }
 .story-cast li { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .story-cast strong { font-size: 16px; }
 .cast-outcome { display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; color: var(--ink-2); white-space: nowrap; }
 .status-mark { flex: none; }
-.story-verdict { margin: 0; font-family: var(--serif); font-size: clamp(28px, 3vw, 42px); line-height: 1.2; font-weight: 480; letter-spacing: -.02em; font-variation-settings: "SOFT" 50; text-wrap: balance; }
+.story-verdict { margin: 0; font-family: var(--serif); font-size: clamp(28px, 3vw, 42px); line-height: 1.2; font-weight: 480; letter-spacing: -.02em; text-wrap: balance; }
 .story-verdict span { color: var(--accent); }
 .story > .notice { margin-top: 40px; }
 .story-section { margin-top: 128px; }
@@ -451,7 +451,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .story-spotlight { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
 .quotes { display: flex; flex-direction: column; gap: 24px; margin-top: 30px; }
 .quote { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; margin: 0; }
-.quote blockquote { margin: 0 0 6px; font-family: var(--serif); font-size: 21px; font-style: italic; line-height: 1.45; font-variation-settings: "SOFT" 50; }
+.quote blockquote { margin: 0 0 6px; font-family: var(--serif); font-size: 21px; font-style: italic; line-height: 1.45; }
 .quote figcaption { font-size: 14.5px; color: var(--ink-2); }
 .quote figcaption a { font-weight: 650; }
 .quote-note { margin: 24px 0 0; font-size: 14px; color: var(--ink-2); }
@@ -461,7 +461,7 @@ input[type=checkbox] { width: 20px; height: 20px; margin: 2px 0 0; flex: none; a
 .spotlight-shot figcaption { margin-top: 12px; font-size: 14px; color: var(--ink-2); }
 .story-finding-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 0; list-style: none; }
 .story-finding { display: flex; flex-direction: column; gap: 14px; padding: 24px 26px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow); }
-.story-finding-head h3 { margin: 6px 0 0; font-family: var(--serif); font-size: 24px; font-weight: 560; line-height: 1.2; font-variation-settings: "SOFT" 50; }
+.story-finding-head h3 { margin: 6px 0 0; font-family: var(--serif); font-size: 24px; font-weight: 560; line-height: 1.2; }
 .story-finding-head h3 span { font-weight: 420; color: var(--ink-2); }
 .story-finding > p { margin: 0; color: var(--ink-2); }
 .story-finding .quote { grid-template-columns: 36px minmax(0, 1fr); gap: 12px; }
