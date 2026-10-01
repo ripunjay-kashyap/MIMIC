@@ -26,7 +26,7 @@ function Decision({ payload }: { payload: EventPayloads["decision"] }) {
   return (
     <>
       <div className="decision-heading">
-        <h3>{action.action} · {payload.element_label || "Page"}</h3>
+        <h3>{action.action}{action.element_id !== null && payload.element_label ? ` · ${payload.element_label}` : ""}</h3>
         <ModelBadge model={payload.model} />
       </div>
       {action.text !== null && <p className="typed-text">Typed text: <code>{action.text}</code></p>}

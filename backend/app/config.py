@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     gemini_mode: Literal["real", "fake"] = "fake"
 
     # HTTP
-    cors_origins: CsvList = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: CsvList = Field(default_factory=lambda: ["http://localhost:3000", "http://localhost:3001"])
     cors_origin_regex: str = r"https://.*\.vercel\.app"
 
     # Targets / safety

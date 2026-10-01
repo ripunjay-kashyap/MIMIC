@@ -273,3 +273,11 @@ def test_arriving_on_risk_page_is_not_offset_by_progress():
                                                             text=text))
     assert {"risk_page", "progress"} <= set(o.signals)
     assert o.deltas["current_frustration"] >= 0.1  # what risk_hesitation looks for
+
+
+def test_visited_paths_include_start_page():
+    p, _ = run(persona(), step(path_before="/demo/", path_after="/demo/plans.html"),
+               step("back", path_before="/demo/plans.html", path_after="/demo/"))
+    assert p.visited_paths == ["/demo/", "/demo/plans.html", "/demo/"]
+    q, _ = run(persona(), step("scroll", path_before="/demo/"))
+    assert q.visited_paths == ["/demo/"]

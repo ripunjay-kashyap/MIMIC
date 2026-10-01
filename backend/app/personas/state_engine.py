@@ -86,7 +86,9 @@ def apply(
     if a.action not in ("done", "give_up"):
         s.action_count += 1
 
-    if not s.visited_paths or s.visited_paths[-1] != step.path_after:
+    if not s.visited_paths:
+        s.visited_paths.append(step.path_before)  # the page the journey started on
+    if s.visited_paths[-1] != step.path_after:
         s.visited_paths.append(step.path_after)
     s.recent_hashes = (s.recent_hashes + [step.page_hash_after])[-STUCK_WINDOW:]
 

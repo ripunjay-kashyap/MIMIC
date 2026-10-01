@@ -7,9 +7,9 @@ npm install
 NEXT_PUBLIC_MOCK=1 npm run dev
 ```
 
-Open the URL printed by Next.js. Choose **Prefill demo**, check authorization, create a run, review the six personas, and **Deploy Swarm**. The scripted stream emits at 300 ms intervals and finishes in roughly 35 seconds. Open the report, follow an evidence link, and use arrow keys in replay. Click a screenshot placeholder to open the full-size overlay; Escape closes it.
+Open the URL printed by Next.js. Choose **Prefill demo**, check authorization, create a run, review the six personas, and **Deploy Swarm**. The scripted stream emits at 300 ms intervals and finishes in roughly 51 seconds. Open the report, follow an evidence link, and use arrow keys in replay. Click a screenshot placeholder to open the full-size overlay; Escape closes it.
 
-Mock run inputs and start times persist in browser localStorage. Reloading reconstructs the current states and replays available history; it does not restart the run. Mock streams contain 117 events: complete observation → decision → result → state sequences for selected milestones, followed by screenshots and outcomes. Action counts include intervening actions. Power completes in eight actions, impatient and cautious abandon, low-literacy backtracks then fails, explorer exhausts its budget, and chaos completes after duplicate payment submissions. The chaos replay includes a clearly labeled illustrative SVG; other null screenshot URLs show “Screenshot unavailable.” Mock interpretations are labeled “rule-based interpretation.”
+Mock run inputs and start times persist in browser localStorage. Reloading reconstructs the current states and replays available history; it does not restart the run. Mock streams contain 170 events: complete observation → decision → result → state sequences for selected milestones, followed by screenshots and outcomes. Every page transition is recorded; action counts may include intervening actions on the same page. Power completes in eight actions, impatient and cautious abandon, low-literacy backtracks then fails, explorer exhausts its budget, and chaos completes after duplicate payment submissions. The chaos replay includes a clearly labeled illustrative SVG; other null screenshot URLs show “Screenshot unavailable.” Mock interpretations are labeled “rule-based interpretation.”
 
 For the live backend, unset `NEXT_PUBLIC_MOCK` or set it to `0` and set `NEXT_PUBLIC_API_URL` (see `.env.example` for local and deployed URLs). These are public, build-time variables; restart/rebuild after changing them. The backend must allow this frontend origin through CORS. No secrets belong in these variables.
 
@@ -50,4 +50,24 @@ After 10 seconds without an SSE connection, live mode refreshes the run snapshot
 
 The local browser scripts under `tests/` are ignored by the repository's existing root rule. They use the already-installed Python Playwright runtime. `verify_mock.py` covers all screens, richer evidence and mobile layout. With `NEXT_PUBLIC_MOCK=0`, use the same test URL variables for `verify_network.py` (HTTP errors, real EventSource reconnect and signed screenshot URLs) and `verify_polling.py` (controlled disconnect/reconnect timing, stale responses, terminal states and cleanup). All API requests in these two checks are intercepted; they do not contact a backend.
 
-The actual local-backend fake-LLM walkthrough is deferred until the human confirms that the backend is ready, as required by the handoff.
+The P10b local-backend walkthrough was deferred under that handoff; the P12 handoff authorizes the local fake-LLM check described below.
+
+## Journey map (P12)
+
+Run pages offer Cards and Journey map tabs. Without a saved preference, cohort review opens Cards and deployment switches to the map. The report loads each saved persona journey and shows a static map above the metrics. Select a persona to highlight its routes or a page to inspect visits, findings and replay evidence. On mobile, scroll the diagram horizontally; the page details appear below it. Journey as text provides the same recorded routes without the diagram.
+
+The graph uses observations and navigation results, never inferred transitions from persona snapshots. `checkGraphMatchesPersonas` checks the ordered route against normalized, collapsed `visited_paths` and reports missing transitions. Development reports warn on mismatches; production builds do not log these warnings.
+
+```bash
+npm run build && npx tsc --noEmit && npm run lint
+npx tsx src/lib/journeyGraph.check.ts
+NEXT_PUBLIC_MOCK=1 npm run build && NEXT_PUBLIC_MOCK=1 npx next start -p 3001
+# In another terminal, from frontend/:
+../backend/.venv/bin/python tests/verify_journey_map.py
+```
+
+For the authorized local fake-LLM backend, build with `NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_MOCK=0`, serve on port 3001, and run the browser script with `JOURNEY_MODE=real`. It saves API journeys and screenshots in `/tmp/mimic-p12/real`. Run `npx tsx src/lib/journeyGraph.check.ts /tmp/mimic-p12/real/journeys.json` to apply the truthfulness gate to that run (nonzero exit on mismatches). No project dependencies are added; the requested `npx tsx` command uses the npm execution cache.
+
+P12 verification (2026-10-01): mock graph has 9 nodes, 27 edges, 6 ends and no path mismatches. The actual fake-LLM run `a0644366-5286-4a8d-b0c5-c9bcbdfa4dc6` retained 395 events; its graph has 9 nodes, 33 edges and 6 ends. All six real path checks report the same mismatch: backend `visited_paths` starts after the first action and omits the initial observed Home page. The graph preserves the recorded Home observation; no route or persona snapshot is rewritten to hide this mismatch. End markers follow the last **observation**, as specified, even when a final navigation result reaches a further page.
+
+The normal browser walkthrough on port 3001 is blocked by the backend's CORS configuration (health returns HTTP 200 without `Access-Control-Allow-Origin` for that origin). Real-data UI verification succeeded only in an isolated Chromium test instance launched with `JOURNEY_TEST_BYPASS_CORS=1 JOURNEY_MODE=real`; that flag affects only the temporary test browser. The application has no CORS bypass. Backend owner follow-up: allow `http://localhost:3001` and reconcile the initial-page omission with the truthfulness invariant. Backend files and the API contract were left untouched.

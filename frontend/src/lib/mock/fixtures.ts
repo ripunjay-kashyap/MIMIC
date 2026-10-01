@@ -21,14 +21,57 @@ export function initialRun(id: string, input: CreateRun, createdAt: string): Run
   };
 }
 type Moment = [number, string, string, string, number, number];
-// Scripted milestones: counts include actions between the selected observations.
+// Scripted milestones include every page transition; omitted actions stay on the same page.
 const scripts: Record<PersonaState["persona_type"], Moment[]> = {
-  impatient: [[1,"plans.html","Get a Quote","I want to get this done quickly.",.05,.15], [3,"verify.html","Send OTP","I sent the code request. Nothing has changed.",.35,.5], [4,"verify.html","Send OTP","Still no response. I am leaving.",.65,.5]],
-  low_literacy: [[1,"learn.html","Get Started","This sounds like the place to begin.",.1,.05], [2,"index.html","Browser Back","There is no next button. I need to go back.",.3,.05], [5,"details.html","Continue","Invalid input does not tell me what to change.",.7,.35]],
-  power: [[1,"plans.html","Get a Quote","This is the direct path to a policy.",.02,.12], [2,"details.html","Select Basic","The basic plan fits this task.",.03,.24], [3,"verify.html","Application details","The required details are ready.",.04,.38], [4,"verify.html","Send OTP","Request the verification code.",.12,.48], [5,"review.html","Verify","The code is correct; continue.",.13,.65], [6,"pay.html","Confirm & Continue","These details were already entered.",.2,.8], [7,"confirmed.html","Proceed","Submit the application payment.",.2,.95], [8,"confirmed.html","Policy issued","The confirmation marker is visible.",.2,1]],
-  cautious: [[2,"details.html","Select Basic","I will check the information before committing.",.1,.2], [6,"pay.html","Confirm & Continue","What are the applicable charges?",.45,.8], [7,"pay.html","Auto-renew and share my data with partners","Sharing is already selected. I cannot make an informed choice.",.75,.8]],
-  explorer: [[1,"explore.html","Explore Plans","I want to compare the available plans.",.1,.1], [5,"explore.html","Talk to an advisor","The advisors are busy and I cannot select a plan here.",.4,.15], [10,"plans.html","Plans","I have used my action budget comparing routes.",.6,.25]],
-  chaos: [[2,"details.html","Mobile number","I will try a five-digit number.",.05,.3], [3,"verify.html","Continue","A five-digit mobile number was accepted.",.1,.4], [8,"pay.html","Proceed twice","I will click Proceed twice before it redirects.",.2,.8], [9,"confirmed.html","Policy issued","Two successful payment records appeared.",.25,1]],
+  impatient: [
+    [1,"plans.html","Get a Quote","I want to get this done quickly.",.05,.15],
+    [2,"details.html","Select Basic","Choose the basic plan.",.1,.25],
+    [3,"verify.html","Continue","Submit the required details.",.2,.4],
+    [4,"verify.html","Send OTP","I sent the code request. Nothing has changed.",.35,.5],
+    [5,"verify.html","Send OTP","Still no response. I am leaving.",.65,.5],
+  ],
+  low_literacy: [
+    [1,"learn.html","Get Started","This sounds like the place to begin.",.1,.05],
+    [2,"index.html","Browser Back","There is no next button. I need to go back.",.3,.05],
+    [3,"plans.html","Get a Quote","Try the quote route.",.4,.1],
+    [4,"details.html","Select Basic","Choose a plan.",.5,.2],
+    [5,"details.html","Continue","Invalid input does not tell me what to change.",.7,.35],
+  ],
+  power: [
+    [1,"plans.html","Get a Quote","This is the direct path to a policy.",.02,.12],
+    [2,"details.html","Select Basic","The basic plan fits this task.",.03,.24],
+    [3,"verify.html","Application details","The required details are ready.",.04,.38],
+    [4,"verify.html","Send OTP","Request the verification code.",.12,.48],
+    [5,"review.html","Verify","The code is correct; continue.",.13,.65],
+    [6,"pay.html","Confirm & Continue","These details were already entered.",.2,.8],
+    [7,"confirmed.html","Proceed","Submit the application payment.",.2,.95],
+    [8,"confirmed.html","Policy issued","The confirmation marker is visible.",.2,1],
+  ],
+  cautious: [
+    [1,"plans.html","Get a Quote","Inspect the plans first.",.05,.1],
+    [2,"details.html","Select Basic","I will check the information before committing.",.1,.2],
+    [3,"verify.html","Continue","Submit application details.",.15,.3],
+    [4,"verify.html","Send OTP","Request verification.",.2,.4],
+    [5,"review.html","Verify","Check the application again.",.3,.6],
+    [6,"pay.html","Confirm & Continue","What are the applicable charges?",.45,.8],
+    [7,"pay.html","Auto-renew and share my data with partners","Sharing is already selected. I cannot make an informed choice.",.75,.8],
+  ],
+  explorer: [
+    [1,"explore.html","Explore Plans","I want to compare the available plans.",.1,.1],
+    [5,"explore.html","Talk to an advisor","The advisors are busy and I cannot select a plan here.",.4,.15],
+    [6,"index.html","Browser Back","Return to the main page.",.45,.15],
+    [10,"plans.html","Get a Quote","I have used my action budget comparing routes.",.6,.25],
+  ],
+  chaos: [
+    [1,"plans.html","Get a Quote","Start a quote.",.01,.1],
+    [2,"details.html","Select Basic","Choose a plan.",.02,.2],
+    [3,"details.html","Mobile number","I will try a five-digit number.",.05,.3],
+    [4,"verify.html","Continue","A five-digit mobile number was accepted.",.1,.4],
+    [5,"review.html","Verify","Submit the demo verification code.",.12,.5],
+    [6,"pay.html","Confirm & Continue","Continue to payment.",.15,.7],
+    [8,"confirmed.html","Proceed twice","I will click Proceed twice before it redirects.",.2,.8],
+    [9,"confirmed.html","Policy issued","Two successful payment records appeared.",.25,1],
+  ],
 };
 const outcomes: Record<PersonaState["persona_type"], [TaskStatus, string]> = {
   impatient: ["abandoned", "No visible feedback after requesting OTP."],
@@ -37,25 +80,6 @@ const outcomes: Record<PersonaState["persona_type"], [TaskStatus, string]> = {
   cautious: ["abandoned", "Unexplained charges and pre-selected data sharing."],
   explorer: ["budget_exhausted", "Reached the 10-action limit while comparing paths."],
   chaos: ["success", "Policy issued; duplicate payment records observed."],
-};
-const sourcePages: Record<string, string> = {
-  "Get a Quote": "index.html",
-  "Get Started": "index.html",
-  "Explore Plans": "index.html",
-  "Select Basic": "plans.html",
-  "Application details": "details.html",
-  "Mobile number": "details.html",
-  "Continue": "details.html",
-  "Send OTP": "verify.html",
-  "Verify": "verify.html",
-  "Confirm & Continue": "review.html",
-  "Proceed": "pay.html",
-  "Proceed twice": "pay.html",
-  "Policy issued": "confirmed.html",
-  "Browser Back": "learn.html",
-  "Talk to an advisor": "explore.html",
-  "Plans": "index.html",
-  "Auto-renew and share my data with partners": "pay.html",
 };
 
 function observation(file: string, label: string, persona: PersonaState): EventPayloads["observation"] {
@@ -121,14 +145,15 @@ export function fixtureEvents(run: RunSummary): RunEvent[] {
     emit("persona_started", { persona: structuredClone(persona) }, persona);
   }
   // These are selected milestones, each with a complete ordered step payload.
-  for (let round = 0; round < 8; round++) {
+  for (let round = 0; round < Math.max(...Object.values(scripts).map(script => script.length)); round++) {
     for (const persona of states) {
       const script = scripts[persona.persona_type];
       const moment = script[round];
       if (!moment) continue;
       const [step, file, label, thought, frustration, progress] = moment;
       const url = `${API_URL}/demo/${file}`;
-      const sourceFile = sourcePages[label] || file;
+      const previous = script[round - 1];
+      const sourceFile = previous?.[1] || "index.html";
       const before = `${API_URL}/demo/${sourceFile}`;
       const observed = observation(sourceFile, label, persona);
       emit("observation", observed, persona, step, before);
@@ -183,12 +208,14 @@ export function fixtureEvents(run: RunSummary): RunEvent[] {
       persona.action_count = step;
       persona.current_frustration = frustration;
       persona.progress = progress;
-      persona.visited_paths.push(url);
+      if (!persona.visited_paths.length) persona.visited_paths.push(before);
+      if (persona.visited_paths.at(-1) !== url) persona.visited_paths.push(url);
       persona.recent_hashes = [...persona.recent_hashes, observed.page_hash].slice(-3);
       if (action === "back") persona.backtracks++;
       if (!ok) persona.failed_attempts = 2;
       emit("state_update", { state: structuredClone(persona), deltas, signals }, persona, step, url);
       if (last) {
+        if (before !== url) emit("observation", observation(file, label, persona), persona, step, url);
         emit("screenshot", {
           reason: "Illustrative mock evidence (not a browser capture)",
           path: `mock/${persona.persona_id}.svg`,

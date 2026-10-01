@@ -1,12 +1,33 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import Link from "next/link";
-import { ApiError, getReport } from "@/lib/api";
+import { ApiError, getJourney, getReport, getRun } from "@/lib/api";
+import { buildJourneyGraph, checkGraphMatchesPersonas } from "@/lib/journeyGraph";
+import type { Finding } from "@/lib/types";
 import { useResource } from "@/lib/use-resource";
 import { FindingCard } from "./FindingCard";
 import { MetricTiles } from "./MetricTiles";
 import { ErrorState, Loading } from "./ResourceState";
+import { JourneyMap } from "./JourneyMap";
+
+function ReportJourneyMap({ id, findings }: { id: string; findings: Finding[] }) {
+  const load = useCallback(async () => {
+    const run = await getRun(id);
+    const journeys = await Promise.all(run.personas.map(persona => getJourney(id, persona.persona_id)));
+    return { run, personas: journeys.map(journey => journey.persona), events: journeys.flatMap(journey => journey.events) };
+  }, [id]);
+  const { data, error, loading, retry } = useResource(load);
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production" && data?.run.status === "completed") {
+      const graph = buildJourneyGraph(data.events, data.personas, findings);
+      for (const mismatch of checkGraphMatchesPersonas(graph, data.personas)) console.warn(`Journey map: ${mismatch}`);
+    }
+  }, [data, findings]);
+  if (loading) return <Loading label="Loading recorded journeys…" />;
+  if (error || !data) return <ErrorState error={error} retry={retry} />;
+  return <JourneyMap events={data.events} personas={data.personas} findings={findings} runId={id} status={data.run.status} />;
+}
 
 export function ReportView({ id }: { id: string }) {
   const load = useCallback(() => getReport(id), [id]);
@@ -32,6 +53,7 @@ export function ReportView({ id }: { id: string }) {
         <h1>Run report</h1>
         <p className="lead">What happened, where it happened, and what to investigate next.</p>
       </div>
+      <ReportJourneyMap key={id} id={id} findings={data.findings} />
       <MetricTiles metrics={data.metrics} />
       <div className="section-heading findings-title">
         <h2>Findings</h2>

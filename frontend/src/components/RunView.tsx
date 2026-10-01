@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getRun, startRun } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -10,15 +10,32 @@ import type { RunSummary } from "@/lib/types";
 import { PersonaCard } from "./PersonaCard";
 import { StatusChip } from "./StatusChip";
 import { ErrorState, Loading } from "./ResourceState";
+import { JourneyMap } from "./JourneyMap";
 
 function LoadedRun({ run }: { run: RunSummary }) {
   const stream = useRunEvents(run.run_id, run);
   const [starting, setStarting] = useState(false);
   const [started, setStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewChoice, setViewChoice] = useState<"cards" | "map" | null>(null);
   const status = started && ["created", "cohort_ready"].includes(stream.status) ? "running" : stream.status;
   const live = !["created", "cohort_ready"].includes(status);
   const personas = Object.values(stream.personas);
+  const view = viewChoice ?? (live ? "map" : "cards");
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      try {
+        const saved = localStorage.getItem("mimic_journey_view");
+        if (saved === "cards" || saved === "map") setViewChoice(saved);
+      } catch { /* Storage is optional, including in private browsing. */ }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  function selectView(next: "cards" | "map") {
+    setViewChoice(next);
+    try { localStorage.setItem("mimic_journey_view", next); } catch { /* Keep the in-memory choice. */ }
+  }
   const connection = ["completed", "failed"].includes(status)
     ? "Stream ended"
     : stream.connected
@@ -82,16 +99,44 @@ function LoadedRun({ run }: { run: RunSummary }) {
         </div>
       )}
       {stream.pollError && <p className="error-panel" role="alert">{stream.pollError}</p>}
-      <div className="persona-grid">
-        {personas.map(persona => (
-          <PersonaCard
-            key={persona.persona_id}
-            persona={persona}
-            runId={run.run_id}
-            live={live}
-            events={stream.events.filter(event => event.persona_id === persona.persona_id)}
-          />
+      <div className="journey-tabs" role="tablist" aria-label="Run view">
+        {(["cards", "map"] as const).map(tab => (
+          <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={view === tab}
+            aria-controls="run-view-panel" tabIndex={view === tab ? 0 : -1}
+            onClick={() => selectView(tab)} onKeyDown={event => {
+              if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+                event.preventDefault();
+                const next = event.key === "Home" ? "cards" : event.key === "End" ? "map" : tab === "cards" ? "map" : "cards";
+                selectView(next);
+                document.getElementById(`tab-${next}`)?.focus();
+              }
+            }}>
+            {tab === "cards" ? "Cards" : "Journey map"}
+          </button>
         ))}
+      </div>
+      <div id="run-view-panel" role="tabpanel" aria-labelledby={`tab-${view}`}>
+        {view === "map" ? (
+          <JourneyMap
+            events={stream.events}
+            personas={personas}
+            runId={run.run_id}
+            status={status}
+            findings={stream.events.flatMap(event => event.type === "finding" ? [event.payload.finding] : [])}
+          />
+        ) : (
+          <div className="persona-grid">
+            {personas.map(persona => (
+              <PersonaCard
+                key={persona.persona_id}
+                persona={persona}
+                runId={run.run_id}
+                live={live}
+                events={stream.events.filter(event => event.persona_id === persona.persona_id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
       {live && (
         <details className="panel event-log">

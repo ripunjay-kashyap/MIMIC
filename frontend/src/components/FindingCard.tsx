@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Finding } from "@/lib/types";
+import { findingAnchor } from "@/lib/journeyGraph";
 
 const sourceLabels: Record<Finding["source"], string> = {
   template: "rule-based interpretation",
@@ -9,7 +10,7 @@ const sourceLabels: Record<Finding["source"], string> = {
 
 export function FindingCard({ finding }: { finding: Finding }) {
   return (
-    <article className="panel finding">
+    <article className="panel finding" id={findingAnchor(finding)}>
       <div className="finding-heading">
         <div>
           <span className={`severity severity-${finding.severity}`}>{finding.severity} severity</span>
