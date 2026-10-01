@@ -41,6 +41,7 @@ async def execute(session: PersonaSession, action: AgentAction, *, double_click:
     blocked_before = len(session.blocked_navigations)
     t0 = time.monotonic()
     error: str | None = None
+    moved = False
 
     try:
         if action.action in ("click", "type", "select"):
@@ -67,7 +68,8 @@ async def execute(session: PersonaSession, action: AgentAction, *, double_click:
                     except PlaywrightError:
                         await loc.select_option(value=action.text or "", timeout=ACTION_TIMEOUT_MS)
         elif action.action == "scroll":
-            await page.evaluate("() => window.scrollBy(0, Math.round(window.innerHeight * 0.8))")
+            moved = await page.evaluate(
+                "() => { const y = window.scrollY; window.scrollBy(0, Math.round(window.innerHeight * 0.8)); return window.scrollY !== y; }")
         elif action.action == "back":
             resp = await page.go_back(wait_until="domcontentloaded", timeout=ACTION_TIMEOUT_MS)
             if not page.url.startswith(("http://", "https://")):
@@ -102,13 +104,16 @@ async def execute(session: PersonaSession, action: AgentAction, *, double_click:
         sig_after = await _signature(session)
 
     url_after = page.url
+    page_changed = sig_after != sig_before
+    if action.action == "scroll":
+        page_changed = bool(moved) if error is None else False
     return ActionResult(
         ok=error is None,
         error=error,
         url_before=url_before,
         url_after=url_after,
         navigated=url_after != url_before,
-        page_changed=sig_after != sig_before,
+        page_changed=page_changed,
         dialogs=session.dialogs[dialogs_before:],
         duration_ms=int((time.monotonic() - t0) * 1000),
     )

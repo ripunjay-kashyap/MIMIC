@@ -40,8 +40,20 @@ def system_prompt(persona: PersonaState) -> str:
     )
 
 
+def _unchanged_steps(persona: PersonaState) -> int:
+    h = persona.recent_hashes
+    n = 0
+    for x in reversed(h):
+        if x != h[-1]:
+            break
+        n += 1
+    return n
+
+
 def user_prompt(persona: PersonaState, observation_text: str, history: list[str], *, escalation: str | None = None) -> str:
     lines = [observation_text]
+    if len(persona.recent_hashes) >= 2 and _unchanged_steps(persona) >= 2:
+        lines.append(f"NOTE: this page has not changed during your last {_unchanged_steps(persona)} actions.")
     if escalation:
         lines.append(f"VISUAL NOTE (from a screenshot): {escalation}")
     lines.append("RECENT STEPS: " + (" | ".join(history[-HISTORY_STEPS:]) if history else "(none, first step)"))
@@ -60,8 +72,16 @@ def build_messages(persona: PersonaState, observation_text: str, history: list[s
     ]
 
 
-def history_line(action: str, label: str | None, text: str | None, ok: bool, error: str | None, navigated_to: str | None) -> str:
+def history_line(action: str, label: str | None, text: str | None, ok: bool, error: str | None, navigated_to: str | None,
+                 changed: bool = True) -> str:
     target = f" '{label}'" if label else ""
     typed = f" = '{text[:30]}'" if text is not None and action == "type" else ""
-    outcome = f"-> now on {navigated_to}" if navigated_to else ("-> ok, same page" if ok else f"-> failed ({error})")
+    if navigated_to:
+        outcome = f"-> now on {navigated_to}"
+    elif not ok:
+        outcome = f"-> failed ({error})"
+    elif action == "scroll" and not changed:
+        outcome = "-> nothing new, already at the bottom"
+    else:
+        outcome = "-> ok, same page" if changed else "-> nothing visibly changed"
     return f"{action}{target}{typed} {outcome}"

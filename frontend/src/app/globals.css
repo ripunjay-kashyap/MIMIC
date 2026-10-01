@@ -110,3 +110,68 @@ input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 
   .finding { padding: 0; }.finding-heading { flex-wrap: wrap; padding: 20px; }.finding-sections { grid-template-columns: minmax(0, 1fr); }.finding-sections section { padding: 20px; }.finding-sections section:nth-child(even) { border-left: 0; }.findings-title { gap: 8px; }
   .outcome-metrics { grid-template-columns: 1fr; gap: 14px; }.timeline-controls { flex-wrap: wrap; gap: 10px; }.timeline-controls span { order: 3; width: 100%; text-align: center; }.timeline-controls .button { padding: 10px 12px; font-size: 12px; }.step-heading { align-items: flex-start; gap: 10px; }.step-heading .url-path { max-width: 65%; }.gate-card { padding: 25px; }.gate-card h1 { font-size: 24px; }.report-retry { display: flex; margin: 18px 0 0; }
 }
+
+/* Inspectable evidence and live recovery states. */
+.model-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid #ccd6e5;
+  border-radius: 5px;
+  color: #41536c;
+  background: #f0f4fa;
+  font: 12px monospace;
+  overflow-wrap: anywhere;
+}
+.decision-heading, .evidence-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.decision-heading h3 { margin: 0; }
+.evidence-chip { border-radius: 5px; padding: 3px 8px; font-size: 12px; }
+.chip-sand { color: #705326; background: #f5eddc; }
+.chip-slate { color: #475b78; background: #e9eef6; }
+.chip-stone { color: #5e5c57; background: #efede7; }
+.chip-rose { color: #873f59; background: #f7e9ef; }
+.chip-lavender { color: #665080; background: #efe9f6; }
+.chip-green { color: #356449; background: #e6f2e9; }
+.chip-teal { color: #36696a; background: #e4f1f0; }
+.chip-clay { color: #894d39; background: #f6e9e2; }
+.observation-alerts { color: #9b3338; border-left: 3px solid #bb6366; padding-left: 10px; }
+.observation-prompt { margin-bottom: 18px; }
+.observation-prompt summary { cursor: pointer; font-weight: 650; font-size: 13px; color: #29476d; }
+.observation-prompt pre {
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 12px/1.65 monospace;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f2f5f9;
+}
+.typed-text code { white-space: pre-wrap; overflow-wrap: anywhere; }
+.timeline-event .model-original { font-size: 12px; }
+.analysis-status { display: inline-flex; align-items: center; gap: 8px; }
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #c4d9df;
+  border-top-color: #126577;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+.finding-groups { display: grid; gap: 32px; }
+.severity-heading { font-size: 19px; }
+.severity-heading span { color: var(--muted); font-weight: 400; }
+.evidence-links { list-style: none; padding: 0; }
+.evidence-links a { display: flex; align-items: center; gap: 10px; overflow-wrap: anywhere; }
+.evidence-links a span { min-width: 0; }
+.evidence-thumbnail { width: 64px; height: 64px; flex-shrink: 0; object-fit: cover; border-radius: 5px; border: 1px solid var(--line); }
+.source-tag { text-transform: none; }

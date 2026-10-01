@@ -45,7 +45,8 @@
     "description": "All plan cards use insurance jargon with no explanation or tooltips.",
     "expected_signals": [
       "risk_hesitation",
-      "abandon_point"
+      "abandon_point",
+      "stuck_on_page"
     ]
   },
   {

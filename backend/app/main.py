@@ -2,11 +2,14 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import health
+from app.api import health, runs
+from app.browser.guards import TargetRejected
+from app.orchestrator.run_manager import RunConflict, RunNotFound, manager
 from app.browser.pool import pool
 from app.config import BACKEND_DIR, get_settings
 
@@ -19,6 +22,7 @@ async def lifespan(app: FastAPI):
     # Launch Chromium in the background so /health answers immediately during cold start
     # (frontend shows "Initializing…" until browser_ready flips).
     browser_task = asyncio.create_task(pool.start())
+    await manager.recover_orphans()
     yield
     browser_task.cancel()
     await pool.stop()
@@ -35,6 +39,23 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(health.router)
+    app.include_router(runs.router)
+
+    @app.exception_handler(RunNotFound)
+    async def _not_found(_: Request, exc: RunNotFound):
+        return JSONResponse({"detail": f"Run {exc} not found."}, status_code=404)
+
+    @app.exception_handler(RunConflict)
+    async def _conflict(_: Request, exc: RunConflict):
+        return JSONResponse({"detail": str(exc)}, status_code=409)
+
+    @app.exception_handler(TargetRejected)
+    async def _bad_target(_: Request, exc: TargetRejected):
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+
+    @app.exception_handler(ValueError)
+    async def _bad_value(_: Request, exc: ValueError):
+        return JSONResponse({"detail": str(exc)}, status_code=400)
     app.mount("/demo", StaticFiles(directory=BACKEND_DIR / "demo_site", html=True), name="demo")
     return app
 

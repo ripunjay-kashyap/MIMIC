@@ -162,7 +162,7 @@ def build_graph(ctx: PersonaRunContext):
                 await shoot(st["step"], reason)
         history = st.get("history", []) + [history_line(
             pol.action.action, st.get("element_label"), pol.action.text, result.ok, result.error,
-            normalize_path(result.url_after) if result.navigated else None)]
+            normalize_path(result.url_after) if result.navigated else None, changed=result.page_changed)]
         return {"persona": out.state, "history": history, "prev_hash": obs_after.page_hash, "prev_result": result}
 
     async def finalize_node(st: LoopState) -> LoopState:

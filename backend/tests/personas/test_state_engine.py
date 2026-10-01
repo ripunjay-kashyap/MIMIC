@@ -259,3 +259,17 @@ def test_state_engine_has_no_io_imports():
     mods = {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)} | {
         a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
     assert not any(m and m.startswith(("app.browser", "app.llm", "app.db", "playwright", "supabase")) for m in mods)
+
+
+def test_co_pay_is_not_a_payment_risk_word():
+    _, [o] = run(persona("cautious"), step(path_before="/demo/", path_after="/demo/explore.html",
+                                           text="Co-pay 20% Sum Insured ₹5L"))
+    assert "risk_page" not in o.signals
+
+
+def test_arriving_on_risk_page_is_not_offset_by_progress():
+    text = "Total payable: ₹4,812 + applicable charges*"
+    p, [o] = run(persona("cautious", progress=0.667), step(path_before="/demo/review.html", path_after="/demo/pay.html",
+                                                            text=text))
+    assert {"risk_page", "progress"} <= set(o.signals)
+    assert o.deltas["current_frustration"] >= 0.1  # what risk_hesitation looks for

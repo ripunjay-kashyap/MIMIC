@@ -193,6 +193,7 @@ def detect_dead_end(events: list[RunEvent]) -> list[Signal]:
 
 
 _AMOUNT = re.compile(r"₹\s?[\d,]+")
+_SUBMIT = re.compile(r"\b(proceed|pay|submit|confirm|continue|verify|buy|place order|checkout)\b", re.IGNORECASE)
 
 
 def _amounts(event: RunEvent) -> Counter:
@@ -206,6 +207,8 @@ def detect_duplicate_submit_effect(events: list[RunEvent]) -> list[Signal]:
         if event.type == "observation":
             last_observations[_page(event)] = event
         elif event.type == "decision" and "double_click" in event.payload.get("policy_tags", []):
+            if not _SUBMIT.search(event.payload.get("element_label") or ""):
+                continue  # only submissions can be duplicated (not navigation links)
             page = _page(event)
             baseline = last_observations.get(page)
             if baseline is None:
@@ -213,7 +216,8 @@ def detect_duplicate_submit_effect(events: list[RunEvent]) -> list[Signal]:
             amounts = _amounts(baseline)
             following = [e for e in events[index + 1:] if e.type == "observation"][:3]
             for observation in following:
-                increases = {amount: n for amount, n in _amounts(observation).items() if n > amounts[amount]}
+                # Same amount shown more often than before (e.g. two payment lines), not new prices on a new page.
+                increases = {amount: n for amount, n in _amounts(observation).items() if amounts[amount] and n > amounts[amount]}
                 if increases:
                     signals.append(_signal(
                         "duplicate_submit_effect", [baseline, event, observation], page,

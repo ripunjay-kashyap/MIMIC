@@ -11,7 +11,8 @@ export interface PersonaState {
   max_actions: number; max_failed_attempts: number; abandon_frustration: number;
   action_count: number; failed_attempts: number; backtracks: number;
   current_frustration: number; progress: number; progress_estimated: boolean;
-  visited_paths: string[]; task_status: TaskStatus; termination_reason: string | null;
+  visited_paths: string[]; recent_hashes: string[];
+  task_status: TaskStatus; termination_reason: string | null;
 }
 export interface RunSummary {
   run_id: string; target_url: string; goal: string; status: RunStatus;
@@ -43,8 +44,23 @@ export interface Journey { persona: PersonaState; events: RunEvent[]; }
 export interface EventPayloads {
   run_status: { status: RunStatus };
   persona_started: { persona: PersonaState };
-  observation: { title: string; element_count: number; summary: string };
-  decision: { action: AgentAction; model: string; element_label: string | null };
+  observation: {
+    title: string;
+    element_count: number;
+    summary: string;
+    path: string;
+    page_hash: string;
+    alerts: string[];
+    prompt: string;
+  };
+  decision: {
+    action: AgentAction;
+    model: string;
+    element_label: string | null;
+    policy_tags: string[];
+    llm_action?: AgentAction | null;
+    tokens?: { prompt: number; completion: number };
+  };
   action_result: { result: ActionResult };
   state_update: { state: PersonaState; deltas: Record<string, number>; signals: string[] };
   escalation: { model: string; observation: string; screenshot_url: string | null };

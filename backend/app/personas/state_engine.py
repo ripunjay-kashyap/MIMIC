@@ -13,7 +13,7 @@ STUCK_WINDOW = 3
 SLOW_ACTION_MS = 2500
 
 RISK_WORDS = re.compile(
-    r"\b(pay|payment|payable|otp|kyc|aadhaar|pan card|card number|upi|charges|share my data|auto-renew|consent)\b",
+    r"(?<!co-)\b(pay|payment|payable|otp|kyc|aadhaar|pan card|card number|upi|charges|share my data|auto-renew|consent)\b",
     re.IGNORECASE,
 )
 TRUST_WORDS = re.compile(r"\b(secure|refund|privacy policy|no hidden|cancel anytime|money-back)\b", re.IGNORECASE)
@@ -121,7 +121,8 @@ def apply(
         signals.append("error_message")
 
     arrived = step.path_after != step.path_before or s.action_count == 1
-    if arrived and RISK_WORDS.search(step.text_after) and not TRUST_WORDS.search(step.text_after):
+    succeeded = success_met(success_criteria, step.result.url_after, step.text_after)
+    if arrived and not succeeded and RISK_WORDS.search(step.text_after) and not TRUST_WORDS.search(step.text_after):
         f = _bump(f, 0.15 * (1 - s.risk_tolerance))
         signals.append("risk_page")
 
@@ -130,7 +131,8 @@ def apply(
 
     progress, estimated = _progress(s, step.path_after, milestones, step.llm_progress_estimate)
     if progress > s.progress:
-        f = _bump(f, -0.10)
+        if "risk_page" not in signals:  # arriving somewhere risky isn't a relief
+            f = _bump(f, -0.10)
         signals.append("progress")
     s.progress, s.progress_estimated = progress, estimated
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440" viewBox="0 0 720 440">
+  <rect width="720" height="440" fill="#f3f6fa"/>
+  <g font-family="Arial, sans-serif" fill="#243851">
+    <text x="40" y="55" font-size="18">MIMIC · Illustrative mock evidence</text>
+    <text x="40" y="120" font-size="30">Policy issued</text>
+    <text x="40" y="162" font-size="18">SurakshaSetu · SS-2026-000123</text>
+    <rect x="40" y="200" width="640" height="64" rx="6" fill="#e2ebe6"/>
+    <text x="60" y="240" font-size="20">Payment 1 · ₹4,812</text>
+    <rect x="40" y="280" width="640" height="64" rx="6" fill="#e2ebe6"/>
+    <text x="60" y="320" font-size="20">Payment 2 · ₹4,812</text>
+    <text x="40" y="400" font-size="16">Synthetic fixture — not a browser capture</text>
+  </g>
+</svg>

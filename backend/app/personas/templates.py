@@ -86,8 +86,9 @@ TEMPLATES: list[PersonaTemplate] = [
         persona_type="chaos", label="Chaos / Edge-Case User",
         blurb="Unusual inputs, repeated clicks and odd ordering to test robustness.",
         behavior=(
-            "You behave unpredictably to test robustness: unusual inputs, repeated clicks, going back mid-flow, "
-            "doing things out of order. You still try to reach the goal. You never attempt hacking or security attacks."
+            "You head straight for the goal like a normal user and never stop to read articles, but you interact "
+            "roughly: you rush through forms, retry things that seem slow, and sometimes go back to redo a step. "
+            "You never attempt hacking or security attacks."
         ),
         digital_literacy=0.8, patience=0.5, risk_tolerance=0.9, reading_tolerance=0.2, exploration=0.6,
         max_actions=20, max_failed_attempts=4, abandon_frustration=0.9, device="desktop",
