@@ -25,7 +25,7 @@ app = modal.App("mimic-backend")
 
 PUBLIC_URL = "https://ripun-j-kashyap--mimic-backend-web.modal.run"
 DEMO_HOST = "ripun-j-kashyap--mimic-backend-web.modal.run"
-GOLDEN_RUN_ID = "195f3baf-ac41-4f86-986b-cd53b05aa792"  # Vercel walkthrough run: synthesis + escalations; replace with final run
+GOLDEN_RUN_ID = "327ebf9a-51ef-485f-b8f6-44d083a27d81"  # final recorded demo run (2026-10-01)
 
 
 @app.function(
