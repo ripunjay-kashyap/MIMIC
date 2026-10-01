@@ -54,3 +54,6 @@ test-results/
 
 # handoff notes
 PROJECT_HANDOFF.md
+
+# agent verification scripts (dev only)
+frontend/tests/

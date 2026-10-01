@@ -37,3 +37,5 @@ With the mock dev server running and the repository's existing Python Playwright
 ```
 
 This walks setup → review → live → reload → report → all six replays, checks evidence selection, arrow navigation and screenshot overlays, then checks each screen at 390px. Screenshots are saved to `/tmp/mimic-p10/`. It also exercises the frontend API error and SSE behavior through browser route stubs when `NEXT_PUBLIC_MOCK=0`; see `tests/verify_network.py`.
+
+On Linux machines that exhaust filesystem watchers, run `WATCHPACK_POLLING=true NEXT_PUBLIC_MOCK=1 npm run dev`. This changes only the dev-server watcher mechanism.

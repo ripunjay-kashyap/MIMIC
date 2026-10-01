@@ -3,9 +3,12 @@
 import asyncio
 import logging
 import os
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from playwright.async_api import Browser, Playwright, async_playwright
 
+from app.browser.session import PersonaSession
 from app.config import get_settings
 
 log = logging.getLogger(__name__)
@@ -48,6 +51,18 @@ class BrowserPool:
         if not self.ready:
             raise RuntimeError("browser not ready")
         return self._browser  # type: ignore[return-value]
+
+    @asynccontextmanager
+    async def session(self, persona_id: str, target_url: str, device: str = "desktop") -> AsyncIterator[PersonaSession]:
+        """Isolated BrowserContext for one persona; bounded by MAX_CONCURRENT_PERSONAS; always closed."""
+        async with self.semaphore:
+            if not self.ready:
+                await self.start()
+            s = await PersonaSession.create(self.browser, self._pw.devices, persona_id, target_url, device)
+            try:
+                yield s
+            finally:
+                await s.close()
 
 
 pool = BrowserPool()

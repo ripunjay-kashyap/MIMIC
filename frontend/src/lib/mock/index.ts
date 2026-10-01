@@ -57,8 +57,7 @@ export async function mockGetJourney(id: string, personaId: string): Promise<Jou
 export function subscribeMock(id: string, onEvent: (event: RunEvent) => void, onOpen: () => void, onError: (error: unknown) => void) {
   let cursor = 0;
   let closed = false;
-  let timer: ReturnType<typeof setInterval> | undefined;
-  const close = () => { closed = true; if (timer) clearInterval(timer); };
+  const close = () => { closed = true; clearInterval(timer); };
   const tick = () => {
     if (closed) return;
     try {
@@ -67,7 +66,7 @@ export function subscribeMock(id: string, onEvent: (event: RunEvent) => void, on
       if (available.at(-1)?.type === "run_status" && (available.at(-1) as Extract<RunEvent, {type:"run_status"}>).payload.status === "completed") close();
     } catch (error) { onError(error); close(); }
   };
-  timer = setInterval(tick, 300);
+  const timer = setInterval(tick, 300);
   queueMicrotask(() => { if (!closed) { onOpen(); tick(); } });
   return close;
 }
