@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # LLMs
     groq_api_key: str = ""
     groq_models: CsvList = Field(
-        default_factory=lambda: ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
+        default_factory=lambda: ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"]
     )
     gemini_api_keys: CsvList = Field(default_factory=list)
     gemini_models: CsvList = Field(

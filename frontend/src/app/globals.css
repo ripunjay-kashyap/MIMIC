@@ -191,7 +191,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 
 .journey-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
 .journey-layout.has-selection { grid-template-columns: minmax(0, 1fr) 310px; }
 .journey-scroll { min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
-.journey-svg { display: block; width: 100%; min-width: 1000px; height: auto; }
+.journey-svg { display: block; width: 100%; min-width: 0; height: auto; }
 .journey-node { cursor: pointer; }
 .journey-node:hover > rect:not(.journey-halo) { fill: #f1f5fa; }
 .journey-node-label { font-size: 13px; font-weight: 650; fill: #192638; }
@@ -218,4 +218,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 
 @media (max-width: 900px) {
   .journey-layout.has-selection { grid-template-columns: minmax(0, 1fr); }
   .journey-panel { border-left: 0; border-top: 1px solid var(--line); padding: 20px 0; max-height: none; }
+}
+@media (max-width: 640px) {
+  .journey-svg { min-width: 1000px; }
 }

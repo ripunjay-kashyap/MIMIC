@@ -11,7 +11,7 @@ from typing import Any, Protocol, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from app.agent.prompts import build_messages, history_line
+from app.agent.prompts import JourneyMemory, build_messages, history_line
 from app.browser.actions import execute
 from app.browser.guards import detect_verification
 from app.browser.observe import Observation, normalize_path
@@ -60,6 +60,7 @@ class LoopState(TypedDict, total=False):
     delayed: bool
     blocked: str | None
     history: list[str]
+    memory: JourneyMemory
     decision: PolicyDecision
     element_label: str | None
     result: ActionResult
@@ -124,7 +125,9 @@ def build_graph(ctx: PersonaRunContext):
         persona, obs = st["persona"], st["obs"]
         history = st.get("history", [])
         escalation = await ctx.escalate(session, obs, persona, history) if ctx.escalate else None
-        messages = build_messages(persona, obs.to_prompt(labels_only=labels_only(persona)), history, escalation=escalation)
+        memory = st.get("memory") or JourneyMemory(obs.path)
+        messages = build_messages(persona, obs.to_prompt(labels_only=labels_only(persona)), history, escalation=escalation,
+                                  memory_lines=memory.lines(obs.path))
         d = await router.decide(persona, messages, identity=identity, step=st["step"])
         el = obs.element(d.action.element_id)
         pol = apply_policy(persona, d.action, path=obs.path, page_text=obs.text, element_label=el.label if el else None,
@@ -163,7 +166,11 @@ def build_graph(ctx: PersonaRunContext):
         history = st.get("history", []) + [history_line(
             pol.action.action, st.get("element_label"), pol.action.text, result.ok, result.error,
             normalize_path(result.url_after) if result.navigated else None, changed=result.page_changed)]
-        return {"persona": out.state, "history": history, "prev_hash": obs_after.page_hash, "prev_result": result}
+        memory = st.get("memory") or JourneyMemory(obs_before.path)
+        memory.record(obs_before.path, pol.action.action, st.get("element_label"),
+                      normalize_path(result.url_after) if result.navigated else None)
+        return {"persona": out.state, "history": history, "prev_hash": obs_after.page_hash, "prev_result": result,
+                "memory": memory}
 
     async def finalize_node(st: LoopState) -> LoopState:
         persona = st["persona"]

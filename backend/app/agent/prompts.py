@@ -50,8 +50,48 @@ def _unchanged_steps(persona: PersonaState) -> int:
     return n
 
 
-def user_prompt(persona: PersonaState, observation_text: str, history: list[str], *, escalation: str | None = None) -> str:
+class JourneyMemory:
+    """What a person would remember: the pages they've been through and which links led nowhere."""
+
+    TRAIL = 8
+
+    def __init__(self, start_path: str | None = None) -> None:
+        self.trail: list[str] = [start_path] if start_path else []
+        self.tried: dict[str, dict[str, dict]] = {}  # page -> label -> {to, count, returned}
+
+    def record(self, path_before: str, action: str, label: str | None, navigated_to: str | None) -> None:
+        if navigated_to and (not self.trail or self.trail[-1] != navigated_to):
+            if not self.trail:
+                self.trail.append(path_before)
+            self.trail.append(navigated_to)
+        if action == "click" and label and navigated_to:
+            t = self.tried.setdefault(path_before, {}).setdefault(label, {"to": navigated_to, "count": 0, "returned": False})
+            t["count"] += 1
+            t["to"] = navigated_to
+        if action == "back" and navigated_to:
+            for t in self.tried.get(navigated_to, {}).values():
+                if t["to"] == path_before:
+                    t["returned"] = True
+
+    def lines(self, path: str) -> list[str]:
+        out = []
+        if len(self.trail) > 1:
+            out.append("JOURNEY SO FAR: " + " → ".join(self.trail[-self.TRAIL:]))
+        tried = self.tried.get(path, {})
+        if tried:
+            parts = []
+            for label, t in tried.items():
+                note = " (you came back from there)" if t["returned"] else ""
+                times = f", {t['count']}×" if t["count"] > 1 else ""
+                parts.append(f"'{label}' → {t['to']}{note}{times}")
+            out.append("ALREADY TRIED ON THIS PAGE: " + "; ".join(parts))
+        return out
+
+
+def user_prompt(persona: PersonaState, observation_text: str, history: list[str], *, escalation: str | None = None,
+                memory_lines: list[str] | None = None) -> str:
     lines = [observation_text]
+    lines.extend(memory_lines or [])
     if len(persona.recent_hashes) >= 2 and _unchanged_steps(persona) >= 2:
         lines.append(f"NOTE: this page has not changed during your last {_unchanged_steps(persona)} actions.")
     if escalation:
@@ -65,10 +105,11 @@ def user_prompt(persona: PersonaState, observation_text: str, history: list[str]
 
 
 def build_messages(persona: PersonaState, observation_text: str, history: list[str], *,
-                   escalation: str | None = None) -> list[ChatMessage]:
+                   escalation: str | None = None, memory_lines: list[str] | None = None) -> list[ChatMessage]:
     return [
         ChatMessage("system", system_prompt(persona)),
-        ChatMessage("user", user_prompt(persona, observation_text, history, escalation=escalation)),
+        ChatMessage("user", user_prompt(persona, observation_text, history, escalation=escalation,
+                                        memory_lines=memory_lines)),
     ]
 
 

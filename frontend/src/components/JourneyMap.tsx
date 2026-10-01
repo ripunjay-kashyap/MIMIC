@@ -196,7 +196,7 @@ function MapContent({ graph, personas, runId, status }: {
               const success = ends.some(end => end.status === "success");
               return (
                 <g key={node.path} className="journey-node" data-path={node.path} transform={`translate(${node.x} ${node.y})`}
-                  role="button" tabIndex={0} aria-label={`${node.label}, ${node.visits.length} visits, ${node.friction?.count || 0} findings`}
+                  role="button" tabIndex={0} aria-label={`${node.label}, ${node.visits.length} visits, ${node.friction?.count || 0} ${node.friction?.count === 1 ? "finding" : "findings"}`}
                   aria-pressed={selectedPath === node.path} onClick={() => setSelectedPath(node.path)}
                   onKeyDown={event => {
                     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedPath(node.path); }
@@ -216,7 +216,7 @@ function MapContent({ graph, personas, runId, status }: {
                     <g transform="translate(0 -51)">
                       <rect x={-46} y={-13} width={92} height={23} rx={6} fill="white" stroke={severityColors[node.friction.severity]} />
                       <text textAnchor="middle" y={3} className="journey-finding-count" fill={severityColors[node.friction.severity]}>
-                        {node.friction.count} findings
+                        {node.friction.count} {node.friction.count === 1 ? "finding" : "findings"}
                       </text>
                     </g>
                   )}

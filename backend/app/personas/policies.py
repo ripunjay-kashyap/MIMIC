@@ -27,6 +27,7 @@ class PolicyMemory:
     """Per-persona, per-run policy scratch state (not part of PersonaState)."""
     rng: random.Random
     scrolled_paths: set[str] = field(default_factory=set)
+    odd_fields: set[str] = field(default_factory=set)  # chaos corrupts each field at most once
     steps_since_forced_back: int = 0
 
 
@@ -75,7 +76,10 @@ def apply_policy(
 
     if t == "chaos":
         r = mem.rng.random()
-        if action.action == "type" and element_kind and element_kind.startswith("input") and r < 0.45:
+        field_key = f"{path}:{element_label}"
+        if (action.action == "type" and element_kind and element_kind.startswith("input") and r < 0.45
+                and field_key not in mem.odd_fields):
+            mem.odd_fields.add(field_key)
             value = mem.rng.choice(EDGE_CASE_INPUTS)
             return PolicyDecision(action.model_copy(update={"text": value}), tags=["edge_case_input"])
         if action.action == "click" and r < 0.30:

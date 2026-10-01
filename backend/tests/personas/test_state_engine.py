@@ -281,3 +281,17 @@ def test_visited_paths_include_start_page():
     assert p.visited_paths == ["/demo/", "/demo/plans.html", "/demo/"]
     q, _ = run(persona(), step("scroll", path_before="/demo/"))
     assert q.visited_paths == ["/demo/"]
+
+
+def test_journey_memory_remembers_dead_ends():
+    from app.agent.prompts import JourneyMemory
+
+    m = JourneyMemory("/demo/")
+    for _ in range(2):
+        m.record("/demo/", "click", "Get Started", "/demo/learn.html")
+        m.record("/demo/learn.html", "scroll", None, None)
+        m.record("/demo/learn.html", "back", None, "/demo/")
+    lines = m.lines("/demo/")
+    assert lines[0] == "JOURNEY SO FAR: /demo/ → /demo/learn.html → /demo/ → /demo/learn.html → /demo/"
+    assert lines[1] == "ALREADY TRIED ON THIS PAGE: 'Get Started' → /demo/learn.html (you came back from there), 2×"
+    assert m.lines("/demo/learn.html") == [lines[0]]
