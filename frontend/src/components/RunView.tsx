@@ -10,7 +10,7 @@ import type { RunSummary } from "@/lib/types";
 import { PersonaCard } from "./PersonaCard";
 import { StatusChip } from "./StatusChip";
 import { ErrorState, Loading } from "./ResourceState";
-import { MissionCounters, MissionRail, LiveTicker } from "./MissionControl";
+import { LiveTicker, RunCounters } from "./LiveStatus";
 import { JourneyMap } from "./JourneyMap";
 
 function LoadedRun({ run }: { run: RunSummary }) {
@@ -58,34 +58,40 @@ function LoadedRun({ run }: { run: RunSummary }) {
   }
 
   return (
-    <>
-      <div className="page-heading">
-        <p className="eyebrow">{live ? "03 / Observe the run" : "02 / Meet the synthetic users"}</p>
-        <h1>{live ? "Live journeys" : "Review cohort"}</h1>
-        <p className="lead">{run.goal}</p>
-        <p className="target-line">Target: <span>{run.target_url}</span></p>
-      </div>
-      <div className="panel run-toolbar">
-        <div className="toolbar-status">
-          <StatusChip status={status} />
-          <span>{personas.filter(finished).length} / {personas.length} personas finished</span>
-          {live && <span className="connection">{connection}</span>}
+    <div className={`run-page${live ? " is-live" : ""}`}>
+      <header className="run-header">
+        <div className="run-title">
+          <p className="kicker">{live ? "Live run" : "Before you deploy"}</p>
+          <h1>{live ? "Live journeys" : "Review cohort"}</h1>
+          <p className="run-goal">{run.goal}</p>
+          <p className="target-line">Target: <span>{run.target_url}</span></p>
+        </div>
+        <div className="run-actions">
+          <div className="toolbar-status">
+            <StatusChip status={status} />
+            <span>{personas.filter(finished).length} of {personas.length} finished</span>
+            {live && <span className={`connection${stream.connected ? " is-connected" : ""}`}>{connection}</span>}
+          </div>
+          {live && <RunCounters personas={personas} events={stream.events} />}
           {status === "aggregating" && (
             <span className="analysis-status" role="status">
               <span className="spinner" aria-hidden="true" />
               Analyzing findings…
             </span>
           )}
+          {status === "completed" && (
+            <Link className="button" href={`/runs/${run.run_id}/report`}>View report →</Link>
+          )}
+          {!live && (
+            <>
+              <button className="button" onClick={deploy} disabled={starting || status !== "cohort_ready"}>
+                {starting ? "Deploying…" : "Deploy Swarm"}
+              </button>
+              <p className="deploy-note">Each persona gets its own isolated browser.</p>
+            </>
+          )}
         </div>
-        {status === "completed" && (
-          <Link className="button" href={`/runs/${run.run_id}/report`}>View report →</Link>
-        )}
-        {!live && (
-          <button className="button" onClick={deploy} disabled={starting || status !== "cohort_ready"}>
-            {starting ? "Deploying…" : "Deploy Swarm"}
-          </button>
-        )}
-      </div>
+      </header>
       {error && <p className="error-panel" role="alert">{error}</p>}
       {stream.runError && <p className="error-panel" role="alert">{stream.runError}</p>}
       {status === "failed" && !stream.runError && (
@@ -100,35 +106,35 @@ function LoadedRun({ run }: { run: RunSummary }) {
         </div>
       )}
       {stream.pollError && <p className="error-panel" role="alert">{stream.pollError}</p>}
-      {live && <MissionCounters personas={personas} events={stream.events} />}
-      <div className="journey-tabs" role="tablist" aria-label="Run view">
-        {(["cards", "map"] as const).map(tab => (
-          <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={view === tab}
-            aria-controls="run-view-panel" tabIndex={view === tab ? 0 : -1}
-            onClick={() => selectView(tab)} onKeyDown={event => {
-              if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
-                event.preventDefault();
-                const next = event.key === "Home" ? "cards" : event.key === "End" ? "map" : tab === "cards" ? "map" : "cards";
-                selectView(next);
-                document.getElementById(`tab-${next}`)?.focus();
-              }
-            }}>
-            {tab === "cards" ? "Cards" : "Journey map"}
-          </button>
-        ))}
+      <div className="view-bar">
+        <div className="journey-tabs" role="tablist" aria-label="Run view">
+          {(["cards", "map"] as const).map(tab => (
+            <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={view === tab}
+              aria-controls="run-view-panel" tabIndex={view === tab ? 0 : -1}
+              onClick={() => selectView(tab)} onKeyDown={event => {
+                if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+                  event.preventDefault();
+                  const next = event.key === "Home" ? "cards" : event.key === "End" ? "map" : tab === "cards" ? "map" : "cards";
+                  selectView(next);
+                  document.getElementById(`tab-${next}`)?.focus();
+                }
+              }}>
+              {tab === "cards" ? "Cards" : "Journey map"}
+            </button>
+          ))}
+        </div>
+        {live && <LiveTicker events={stream.events} personas={personas} />}
       </div>
       <div id="run-view-panel" role="tabpanel" aria-labelledby={`tab-${view}`}>
         {view === "map" ? (
-          <>
-          {live && <MissionRail personas={personas} runId={run.run_id} />}
           <JourneyMap
             events={stream.events}
             personas={personas}
             runId={run.run_id}
             status={status}
+            showThoughts={live}
             findings={stream.events.flatMap(event => event.type === "finding" ? [event.payload.finding] : [])}
           />
-          </>
         ) : (
           <div className="persona-grid">
             {personas.map(persona => (
@@ -143,9 +149,8 @@ function LoadedRun({ run }: { run: RunSummary }) {
           </div>
         )}
       </div>
-      {live && <LiveTicker events={stream.events} personas={personas} />}
       {live && (
-        <details className="panel event-log">
+        <details className="event-log">
           <summary>Raw event log · {stream.events.length} events received</summary>
           <p className="muted">Last 200 events, newest first</p>
           <ol>
@@ -158,7 +163,7 @@ function LoadedRun({ run }: { run: RunSummary }) {
           </ol>
         </details>
       )}
-    </>
+    </div>
   );
 }
 

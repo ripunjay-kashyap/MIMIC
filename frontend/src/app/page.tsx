@@ -1,12 +1,23 @@
 "use client";
 import Link from "next/link";
-import { PersonaSprite, personaNames, type PersonaType } from "@/components/PersonaSprite";
-import { MOCK } from "@/lib/config";
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PersonaSprite, personaNames, personaStyle, personaTypes, type PersonaType } from "@/components/PersonaSprite";
 import { API_URL, createRun } from "@/lib/api";
-import { DEMO_GOAL } from "@/lib/config";
+import { DEMO_GOAL, MOCK } from "@/lib/config";
 import { errorMessage } from "@/lib/errors";
+
+// Product copy describing each behavior template (not run data).
+const intros: Record<PersonaType, string> = {
+  impatient: "Wants it done fast. Clicks the most obvious button and leaves when blocked.",
+  low_literacy: "New to web apps. Needs plain labels and a clear next step.",
+  power: "Takes the shortest path and skips anything optional.",
+  cautious: "Reads the fine print on fees, consent and payment.",
+  explorer: "Compares options, opens side paths and often backtracks.",
+  chaos: "Odd inputs, repeated clicks and strange ordering.",
+};
+
 export default function Setup() {
   const router = useRouter();
   const [target, setTarget] = useState(""); const [goal, setGoal] = useState("");
@@ -27,36 +38,85 @@ export default function Setup() {
     } catch (error) { setError(errorMessage(error)); setPending(false); }
   }
   return <>
-    <section className="setup-hero" aria-label="Synthetic usability testing">
-      <div className="page-heading">
-        <p className="eyebrow">01 / Configure a test · MIMIC × GhostQA</p>
-        <h1>Ship to synthetic users<br /><span className="hero-accent">before real users.</span></h1>
-        <p className="lead">One goal. Six independent browsers. Watch AI personas find the friction in your product — then replay the proof.</p>
-        <div className="hero-actions">
-          <Link className="button secondary" href="/case-study" prefetch={false}>
-            {MOCK ? "Watch a mock run" : "Watch a real run"} <span aria-hidden="true"> ↗</span>
-          </Link>
-          <span className="muted small">Every finding has a trail.</span>
-        </div>
-      </div>
-      <div className="swarm-display" aria-label="The six behavioral identities">
-        <div className="swarm-caption"><span>Meet your test crew</span><span>06 / identities</span></div>
-        <div className="swarm-sprites">
-          {(Object.keys(personaNames) as PersonaType[]).map(type => (
-            <figure key={type}>
-              <PersonaSprite type={type} size={48} />
-              <figcaption>{personaNames[type]}</figcaption>
-            </figure>
+    <section className="hero" aria-labelledby="hero-title">
+      <div className="hero-copy">
+        <p className="kicker">Synthetic usability testing</p>
+        <h1 id="hero-title" className="display">Ship to synthetic users <em>before real users.</em></h1>
+        <p className="lead">Give six AI personas the same goal on your website, each in its own browser. See where they go and where they get stuck, then replay the steps behind every finding.</p>
+        <ul className="cast" aria-label="The six personas">
+          {personaTypes.map((type, index) => (
+            <li key={type} style={{ "--i": index } as CSSProperties}>
+              <PersonaSprite type={type} size={64} />
+              <span>{personaNames[type]}</span>
+            </li>
           ))}
-        </div>
-        <p className="swarm-footer">Different instincts. The same task. Isolated browsers.</p>
+        </ul>
+        <p className="hero-link">
+          <Link href="/case-study" prefetch={false}>{MOCK ? "Watch a mock run" : "See a real recorded run"} <span aria-hidden="true">→</span></Link>
+        </p>
       </div>
+      <section className="setup-card" aria-labelledby="setup-title">
+        <div className="setup-card-head">
+          <h2 id="setup-title">Set up a run</h2>
+          <button type="button" className="button secondary small" onClick={prefill} disabled={pending}>Prefill demo</button>
+        </div>
+        <form onSubmit={submit}>
+          <div className="field">
+            <label htmlFor="target">Target URL</label>
+            <input id="target" type="url" placeholder="https://your-site.example" value={target} onChange={e => setTarget(e.target.value)} required disabled={pending} />
+          </div>
+          <div className="field">
+            <label htmlFor="goal">Goal</label>
+            <textarea id="goal" rows={3} placeholder="What should each persona try to complete?" value={goal} onChange={e => setGoal(e.target.value)} required disabled={pending} />
+          </div>
+          <fieldset disabled={pending}>
+            <legend>Success criteria <span>optional</span></legend>
+            <div className="criteria">
+              <div className="field">
+                <label htmlFor="url-contains">Success when URL contains</label>
+                <input id="url-contains" value={urlContains} onChange={e => setUrlContains(e.target.value)} placeholder="e.g. confirmed" />
+              </div>
+              <div className="field">
+                <label htmlFor="text-visible">Success when text visible</label>
+                <input id="text-visible" value={textVisible} onChange={e => setTextVisible(e.target.value)} placeholder="e.g. Policy issued" />
+              </div>
+            </div>
+          </fieldset>
+          <label className="checkbox-label" htmlFor="authorized">
+            <input id="authorized" type="checkbox" checked={authorized} onChange={e => setAuthorized(e.target.checked)} required disabled={pending} />
+            I am authorized to test this target
+          </label>
+          {error && <p className="error-panel" role="alert">{error}</p>}
+          <button className="button wide" type="submit" disabled={pending}>{pending ? "Creating run…" : "Create run"}</button>
+        </form>
+      </section>
     </section>
-    <div className="setup-grid"><section className="panel setup-panel"><div className="section-heading"><h2>Set up a run</h2><button type="button" className="button secondary" onClick={prefill} disabled={pending}>Prefill demo</button></div>
-      <form onSubmit={submit}><label htmlFor="target">Target URL</label><input id="target" type="url" placeholder="https://your-site.example" value={target} onChange={e => setTarget(e.target.value)} required disabled={pending} />
-        <label htmlFor="goal">Goal</label><textarea id="goal" rows={4} placeholder="What should each persona try to complete?" value={goal} onChange={e => setGoal(e.target.value)} required disabled={pending} />
-        <fieldset disabled={pending}><legend>Success criteria <span className="muted">· optional</span></legend><label htmlFor="url-contains">Success when URL contains</label><input id="url-contains" value={urlContains} onChange={e => setUrlContains(e.target.value)} placeholder="e.g. confirmed" /><label htmlFor="text-visible">Success when text visible</label><input id="text-visible" value={textVisible} onChange={e => setTextVisible(e.target.value)} placeholder="e.g. Policy issued" /></fieldset>
-        <label className="checkbox-label" htmlFor="authorized"><input id="authorized" type="checkbox" checked={authorized} onChange={e => setAuthorized(e.target.checked)} required disabled={pending} />I am authorized to test this target</label>
-        {error && <p className="error-panel" role="alert">{error}</p>}<button className="button" type="submit" disabled={pending}>{pending ? "Creating run…" : "Create run"}</button>
-      </form></section><aside className="setup-aside"><p className="eyebrow">From intention to evidence</p><h2>Your next release,<br />seen six ways.</h2><ol className="workflow"><li><strong>Configure</strong><p>Understand each persona’s traits, limits and device before you deploy.</p></li><li><strong>Deploy swarm</strong><p>Follow decisions, progress and friction as each persona explores.</p></li><li><strong>Inspect the evidence</strong><p>Open findings and replay the exact steps behind them.</p></li></ol><p className="muted small">These are controlled behavioral simulations, not predictions about demographic groups.</p></aside></div></>;
+
+    <section className="meet" aria-labelledby="meet-title">
+      <div className="section-head">
+        <h2 id="meet-title">Meet the six</h2>
+        <p>Each has its own patience, reading tolerance and appetite for risk. They are controlled behavioral simulations, not predictions about demographic groups.</p>
+      </div>
+      <ul className="meet-grid">
+        {personaTypes.map(type => (
+          <li key={type} style={personaStyle(type)}>
+            <PersonaSprite type={type} size={56} />
+            <h3>{personaNames[type]}</h3>
+            <p>{intros[type]}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section className="how" aria-labelledby="how-title">
+      <div className="section-head">
+        <h2 id="how-title">How a run works</h2>
+      </div>
+      <ol className="steps">
+        <li><h3>Set a goal</h3><p>Point the cohort at a site you are allowed to test, and say what success looks like.</p></li>
+        <li><h3>Watch them try</h3><p>Six isolated browsers work in parallel. The journey map shows every page they reach, as it happens.</p></li>
+        <li><h3>Follow the evidence</h3><p>Findings keep what was observed apart from what it might mean, and each links to the recorded step.</p></li>
+      </ol>
+    </section>
+  </>;
 }

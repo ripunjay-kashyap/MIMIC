@@ -19,7 +19,7 @@ npx tsc --noEmit
 npm run lint
 ```
 
-The dev and build scripts explicitly use Webpack to honor the handoff's no-Turbopack requirement. System fonts avoid external font requests. No extra UI or state libraries were added.
+The dev and build scripts explicitly use Webpack to honor the handoff's no-Turbopack requirement. Fraunces and Figtree are self-hosted through `next/font` at build time, so browsers make no requests to Google. No extra UI or state libraries were added. The visual direction is described in `DESIGN.md`; the case study (`/case-study`) is a 2D scroll story built from the golden run's recorded events and findings.
 
 ## Contract decisions
 

@@ -51,7 +51,8 @@ function pageLabel(path: string, title?: string) {
   if (path === "/demo/") return "Home";
   const label = title?.split(/\s+[|–—]\s+|\s+-\s+/)[0].trim();
   if (label) return label;
-  return path.split("/").filter(Boolean).at(-1)?.replace(/\.html$/, "").replaceAll("-", " ") || "Home";
+  const name = path.split("/").filter(Boolean).at(-1)?.replace(/\.html$/, "").replaceAll("-", " ");
+  return name ? name[0].toUpperCase() + name.slice(1) : "Home";
 }
 
 function layout(nodes: JourneyNode[], transitions: JourneyTransition[]) {

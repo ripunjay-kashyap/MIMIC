@@ -24,30 +24,30 @@ function Screenshot({ event }: { event: Shot }) {
 function Decision({ payload }: { payload: EventPayloads["decision"] }) {
   const { action, llm_action: original } = payload;
   return (
-    <>
+    <div className="decision-block">
       <div className="decision-heading">
         <h3>{action.action}{action.element_id !== null && payload.element_label ? ` · ${payload.element_label}` : ""}</h3>
         <ModelBadge model={payload.model} />
       </div>
+      {action.thought && <blockquote className="replay-thought">“{action.thought}”</blockquote>}
       {action.text !== null && <p className="typed-text">Typed text: <code>{action.text}</code></p>}
       <PolicyChips tags={payload.policy_tags || []} />
       {original && (
         <p className="muted model-original">
-          model wanted: {original.action}{original.element_id !== null ? ` element ${original.element_id}` : ""}
+          Model wanted: {original.action}{original.element_id !== null ? ` element ${original.element_id}` : ""}
         </p>
       )}
-      <p className="replay-thought">{action.thought}</p>
-      <p className="muted">
+      <p className="decision-meta">
         Confidence {Math.round(action.confidence * 100)}% · Expected: {action.expects}
       </p>
-    </>
+    </div>
   );
 }
 
 function Observation({ payload }: { payload: EventPayloads["observation"] }) {
   return (
-    <>
-      <p>{payload.summary}</p>
+    <div className="observation-block">
+      <p className="observation-summary">{payload.summary}</p>
       {!!payload.alerts?.length && (
         <p className="observation-alerts"><strong>Page alerts:</strong> {payload.alerts.join(" · ")}</p>
       )}
@@ -55,13 +55,23 @@ function Observation({ payload }: { payload: EventPayloads["observation"] }) {
         <summary>What the persona saw</summary>
         <pre>{payload.prompt || "Observation text unavailable."}</pre>
       </details>
-    </>
+    </div>
+  );
+}
+
+function Escalation({ payload }: { payload: EventPayloads["escalation"] }) {
+  return (
+    <div className="escalation-block">
+      <p className="source-tag">AI-written visual check</p>
+      <p><strong>Looked closer at the screenshot</strong> <ModelBadge model={payload.model} /></p>
+      <p>{payload.observation}</p>
+    </div>
   );
 }
 
 function StateUpdate({ payload }: { payload: EventPayloads["state_update"] }) {
   return (
-    <>
+    <div className="state-block">
       <SignalChips signals={payload.signals} />
       <div className="deltas">
         {Object.entries(payload.deltas).map(([key, value]) => (
@@ -71,7 +81,7 @@ function StateUpdate({ payload }: { payload: EventPayloads["state_update"] }) {
           </span>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -97,7 +107,8 @@ export function Timeline({ events, target }: { events: RunEvent[]; target?: stri
 
   useEffect(() => {
     if (selected !== undefined && (target !== undefined || selected !== groups[0]?.[0])) {
-      document.getElementById(`step-${selected}`)?.scrollIntoView({ block: "center" });
+      // Start, not center: a step with a screenshot can be taller than the viewport.
+      document.getElementById(`step-${selected}`)?.scrollIntoView({ block: "start" });
     }
   }, [selected, target, groups]);
 
@@ -122,7 +133,7 @@ export function Timeline({ events, target }: { events: RunEvent[]; target?: stri
     if (shot) dialog.current?.showModal();
   }, [shot]);
 
-  if (!groups.length) return <div className="panel"><p>No steps recorded yet.</p></div>;
+  if (!groups.length) return <p className="empty-note">No steps recorded yet.</p>;
 
   return (
     <>
@@ -130,7 +141,7 @@ export function Timeline({ events, target }: { events: RunEvent[]; target?: stri
         <button className="button secondary" disabled={selectedIndex <= 0} onClick={() => setSelected(groups[selectedIndex - 1][0])}>
           ← Previous step
         </button>
-        <span className="muted">Use ← / → keys</span>
+        <span>Step {selected} of {groups.length} · use ← / → keys</span>
         <button className="button secondary" disabled={selectedIndex >= groups.length - 1} onClick={() => setSelected(groups[selectedIndex + 1][0])}>
           Next step →
         </button>
@@ -141,36 +152,40 @@ export function Timeline({ events, target }: { events: RunEvent[]; target?: stri
       <ol className="timeline">
         {groups.map(([step, items]) => (
           <li
-            className={`panel timeline-step ${selected === step ? "selected-step" : ""}`}
+            className={`timeline-step${selected === step ? " selected-step" : ""}`}
             key={step}
             id={`step-${step}`}
             data-step={step}
             aria-current={selected === step ? "step" : undefined}
           >
-            <div className="step-heading">
-              <button className="step-selector" onClick={() => setSelected(step)}>Step {step}</button>
-              <span className="url-path">{pathOnly(items.findLast(e => e.url)?.url)}</span>
-            </div>
-            {items.map(event => (
-              <div className="timeline-event" key={event.seq} data-event-seq={event.seq}>
-                {event.type === "observation" && <Observation payload={event.payload} />}
-                {event.type === "decision" && <Decision payload={event.payload} />}
-                {event.type === "action_result" && (
-                  <p className={event.payload.result.ok ? "result-ok" : "result-error"}>
-                    <strong>Result: {event.payload.result.ok ? "OK" : "Error"}</strong>
-                    {event.payload.result.error && ` — ${event.payload.result.error}`} · {event.payload.result.duration_ms} ms
-                  </p>
-                )}
-                {event.type === "state_update" && <StateUpdate payload={event.payload} />}
-                {event.type === "screenshot" && (
-                  <button className="screenshot-button" onClick={() => setShot(event)} aria-label={`Open screenshot for step ${step}`}>
-                    <Screenshot event={event} />
-                  </button>
-                )}
-                {event.type === "persona_finished" && <p><strong>Finished:</strong> {event.payload.reason}</p>}
-                {event.type === "error" && <p className="result-error">{event.payload.message}</p>}
+            <span className="step-marker" aria-hidden="true" />
+            <div className="step-body">
+              <div className="step-heading">
+                <button className="step-selector" onClick={() => setSelected(step)}>Step {step}</button>
+                <span className="url-path">{pathOnly(items.findLast(e => e.url)?.url)}</span>
               </div>
-            ))}
+              {items.map(event => (
+                <div className="timeline-event" key={event.seq} data-event-seq={event.seq}>
+                  {event.type === "observation" && <Observation payload={event.payload} />}
+                  {event.type === "decision" && <Decision payload={event.payload} />}
+                  {event.type === "escalation" && <Escalation payload={event.payload} />}
+                  {event.type === "action_result" && (
+                    <p className={event.payload.result.ok ? "result-ok" : "result-error"}>
+                      <strong>Result: {event.payload.result.ok ? "OK" : "Error"}</strong>
+                      {event.payload.result.error && ` — ${event.payload.result.error}`} · {event.payload.result.duration_ms} ms
+                    </p>
+                  )}
+                  {event.type === "state_update" && <StateUpdate payload={event.payload} />}
+                  {event.type === "screenshot" && (
+                    <button className="screenshot-button" onClick={() => setShot(event)} aria-label={`Open screenshot for step ${step}`}>
+                      <Screenshot event={event} />
+                    </button>
+                  )}
+                  {event.type === "persona_finished" && <p className="finished-line"><strong>Finished:</strong> {event.payload.reason}</p>}
+                  {event.type === "error" && <p className="result-error">{event.payload.message}</p>}
+                </div>
+              ))}
+            </div>
           </li>
         ))}
       </ol>

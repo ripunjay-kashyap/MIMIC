@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { getHealth } from "@/lib/api";
+import { PersonaSprite, personaTypes } from "./PersonaSprite";
 
 export function HealthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -28,10 +30,13 @@ export function HealthGate({ children }: { children: React.ReactNode }) {
     return () => { active = false; clearInterval(clock); clearTimeout(poll); };
   }, []);
   if (ready) return children;
-  return <div className="gate"><section className="panel gate-card" role="status">
-    <span className="eyebrow">Agent runtime</span>
-    <h1>{initializing ? "Initializing browser workers…" : elapsed < 3 ? "Checking agent runtime…" : "Waking up agent runtime…"}</h1>
-    {!initializing && elapsed >= 3 && <p>Free hosting can take ~30–60 s.</p>}
-    <p className="timer">{elapsed} seconds elapsed</p><p className="muted">This page will open automatically when the runtime is ready.</p>
+  return <div className="gate"><section className="gate-card" role="status">
+    <ul className="cast gate-cast" aria-hidden="true">
+      {personaTypes.map((type, index) => <li key={type} style={{ "--i": index } as CSSProperties}><PersonaSprite type={type} size={52} /></li>)}
+    </ul>
+    <h1>{initializing ? "Getting the test browsers ready…" : elapsed < 3 ? "Checking in with the test browsers…" : "Waking up the test browsers…"}</h1>
+    {!initializing && elapsed >= 3 && <p>Free hosting can take 30–60 seconds to wake up.</p>}
+    <p className="timer">{elapsed} seconds elapsed</p>
+    <p className="muted">This page opens on its own when everything is ready.</p>
   </section></div>;
 }
