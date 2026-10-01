@@ -8,7 +8,7 @@ MIMIC sends six AI personas with different behaviours through your site and show
 |---|---|
 | **Live app** | https://mimic-teal-one.vercel.app |
 | **Case study** (one recorded run, told as a story) | https://mimic-teal-one.vercel.app/case-study |
-| **API** (interactive docs at `/docs`) | https://ripun-j-kashyap--mimic-backend-web.modal.run |
+| **API** (interactive docs) | https://ripun-j-kashyap--mimic-backend-web.modal.run/docs |
 | **Public agent trace** (LangSmith) | https://smith.langchain.com/public/2542d900-ca97-4bee-9373-2d65a8eaaa8d/r |
 
 ![Landing page](media/landing.png)
@@ -51,10 +51,10 @@ One run of the full cohort against our seeded demo site ([run report](https://mi
 | Outcomes | 2 reached the goal (Power, Cautious) · 3 gave up (Impatient, Low literacy, Explorer) · 1 ran out of actions (Chaos) |
 | Different routes taken | 5 |
 | Findings | 11, each linked to the events and screenshots behind it |
-| Seeded defects found | **6 of 12** (D2, D5, D6, D7, D9, D10) |
+| Seeded defects found | **6 of 12** (D2, D5, D6, D7, D9, D10; matched by page and finding type) |
 | Errors | 0 |
 
-**The clearest signal:** three of the six personas gave up on the same page, the mobile OTP step, and all four that reached it hesitated there. That page has two seeded defects: the OTP arrives silently after three seconds, and the code is shown only in small footer text.
+**The clearest signal:** three of the six personas gave up on the same page, the mobile OTP step, and four of the five that reached it hesitated there. That page has two seeded defects: the OTP arrives silently after three seconds, and the code is shown only in small footer text.
 
 Across six scored real runs during development, MIMIC found between 42% and 83% of the seeded defects. Results vary from run to run because the agents are LLM-driven, which is also why every finding links back to its evidence.
 
@@ -91,13 +91,13 @@ Next.js UI (Vercel) ──HTTPS + SSE──► FastAPI on Modal (one always-on c
                                       ├─ Model router
                                       │    Groq (qwen3.8-27b, gpt-oss-120b) ─► decisions
                                       │    Gemini 3.5 Flash-Lite ──────────────► decisions + fallback
-                                      │    Gemini 3.8 / 3.7 Flash ─────────────► screenshot reading, report wording
+                                      │    Gemini 3.8 → 3.7 Flash → Flash-Lite ► screenshot reading, report wording
                                       ├─ Event bus ─► Supabase (runs, personas, events, findings, screenshots)
                                       ├─ Analysis: metrics + 13 friction detectors + clustering
                                       └─ Tracing ─► LangSmith
 ```
 
-- **Visual escalation.** Screenshots go to Gemini only when the text view isn't enough (a persona is stuck, or the page has almost no controls). Each page is read at most once per run, at most four times per run, and the result is shared across personas.
+- **Visual escalation.** Screenshots go to Gemini only when the text view isn't enough (a persona is stuck, or the page has almost no controls). A run reads at most four screenshots, never the same page twice, and shares each reading across personas. Gemini 3.8 Flash is tried first, falling back to 3.7 Flash and then Flash-Lite when a model is overloaded or out of quota.
 - **Quota discipline.** Token-bucket rate limiting per model, spillover across models, and Gemini usage tracked per key and model (every request counts, including 503s).
 - **Evidence first.** Findings come from deterministic detectors over stored events. The LLM only rewrites the interpretation text for findings that already exist; it cannot add findings or change evidence.
 
@@ -113,7 +113,7 @@ Every persona run is a LangSmith trace: each LangGraph step (observe → decide 
 
 A fictional Indian health-insurance onboarding site (`backend/demo_site/`, served at [`/demo/`](https://ripun-j-kashyap--mimic-backend-web.modal.run/demo/)) with **13 documented usability defects** (`SEEDED_ISSUES.json`): similarly worded call-to-action buttons, a dead-end article, unexplained insurance jargon, a form that accepts a 5-digit mobile number, generic "Invalid input" errors, an OTP that arrives silently after 3 s with the code hidden in footer text, an unnecessary confirmation step, unexplained "applicable charges*", a pre-ticked data-sharing consent box, a double-click that charges twice, and a mobile layout that hides the call-to-action below the fold.
 
-We test on a site we built so we can **measure** what MIMIC finds instead of only claiming it. `scripts/evaluate_run.py` scores a run's findings against this ground truth (12 defects are detectable from text and behaviour; the 13th is visual only).
+We test on a site we built so we can **measure** what MIMIC finds instead of only claiming it. `backend/scripts/evaluate_run.py` scores a run's findings against this ground truth (12 defects are detectable from text and behaviour; the 13th is visual only).
 
 ## API
 

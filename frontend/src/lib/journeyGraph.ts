@@ -194,9 +194,9 @@ export function plural(count: number, word: string) {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
 
-/** Observed visits; a page that was reached but never observed (e.g. a terminal success page) shows its arrivals. */
+/** Steps observed on a page; a page that was reached but never observed (e.g. a terminal success page) shows its arrivals. */
 export function visitLabel(graph: JourneyGraph, node: JourneyNode) {
-  if (node.visits.length) return plural(node.visits.length, "visit");
+  if (node.visits.length) return plural(node.visits.length, "step");
   const arrivals = new Set(graph.transitions.filter(t => t.to === node.path).map(t => t.persona_id)).size;
-  return arrivals ? `reached by ${arrivals}` : plural(0, "visit");
+  return arrivals ? `reached by ${arrivals}` : plural(0, "step");
 }

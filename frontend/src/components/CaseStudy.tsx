@@ -154,7 +154,7 @@ function RouteLanes({ graph, personas, highlight }: { graph: JourneyGraph; perso
               return (
                 <g key={`${pair.from}→${pair.to}`}>
                   <path className={`lane-arc${pair.kind === "back" ? " is-back" : ""}`} d={`M ${x1} ${y} Q ${(x1 + x2) / 2} ${cy} ${x2} ${y}`}
-                    pathLength={1} fill="none" stroke={color} strokeWidth={Math.min(1.5 + pair.count, 6)}
+                    pathLength={pair.kind === "back" ? undefined : 1} fill="none" stroke={color} strokeWidth={Math.min(1.5 + pair.count, 6)}
                     strokeDasharray={pair.kind === "back" ? "5 5" : undefined} strokeLinecap="round"
                     style={{ "--order": pair.order } as CSSProperties} />
                   {pair.count > 1 && <text x={(x1 + x2) / 2} y={back ? y + lift + 6 : y - lift - 1} textAnchor="middle" className="lane-count">{pair.count}×</text>}
@@ -270,7 +270,13 @@ function LoadedCaseStudy({ data }: { data: CaseData }) {
     .map(([status, count]) => `${numberWord(count).toLowerCase()} ${outcomeVerbs[status][1]}`);
   const recorded = new Date(run.created_at);
   let host = run.target_url;
-  try { host = new URL(run.target_url).host; } catch { /* Keep the recorded URL. */ }
+  let seededDemo = false;
+  try {
+    const url = new URL(run.target_url);
+    host = url.host;
+    // Our own seeded target (served by the MIMIC backend at /demo/), not any site with a /demo path.
+    seededDemo = /\/demo\/?$/.test(url.pathname) && /mimic-backend|^localhost(:\d+)?$|^127\.0\.0\.1(:\d+)?$/.test(url.host);
+  } catch { /* Keep the recorded URL. */ }
   const hotFindings = hottest ? [...new Set(hottest.findings.map(f => categoryTitle(f.category).toLowerCase()))] : [];
   const stuckCount = hottest?.friction?.personas.length ?? 0;
   const shotPersona = shot ? personas.find(p => p.persona_id === shot.persona_id) : undefined;
@@ -283,7 +289,7 @@ function LoadedCaseStudy({ data }: { data: CaseData }) {
         <h1 className="display">{numberWord(personas.length)} personas. <em>One goal.</em></h1>
         <blockquote className="story-goal">“{run.goal}”</blockquote>
         <p className="story-meta">
-          Recorded {Number.isNaN(recorded.getTime()) ? "" : `${recorded.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} `}on {host}.
+          Recorded {Number.isNaN(recorded.getTime()) ? "" : `${recorded.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} `}on {seededDemo ? "SurakshaSetu, a demo insurance site we built with 13 known usability defects" : host}.
           {" "}Every number, route, quote and screenshot on this page comes from that run.
         </p>
         <ol className="story-cast" aria-label="Who took part and how it ended">

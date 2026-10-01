@@ -6,7 +6,7 @@ import { PersonaSprite, personaTypeFromId } from "./PersonaSprite";
 
 const sourceLabels: Record<Finding["source"], string> = {
   template: "rule-based interpretation",
-  llm_synthesized: "AI-written interpretation (verify)",
+  llm_synthesized: "AI-written · check against the evidence",
   deterministic: "Deterministic finding",
 };
 

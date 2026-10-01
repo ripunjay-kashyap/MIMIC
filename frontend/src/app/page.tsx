@@ -52,7 +52,7 @@ export default function Setup() {
           ))}
         </ul>
         <p className="hero-link">
-          <Link href="/case-study" prefetch={false}>{MOCK ? "Watch a mock run" : "See a real recorded run"} <span aria-hidden="true">→</span></Link>
+          <Link className="button secondary" href="/case-study" prefetch={false}>{MOCK ? "Watch a mock run" : "See a real recorded run"} <span aria-hidden="true">→</span></Link>
         </p>
       </div>
       <section className="setup-card" aria-labelledby="setup-title">

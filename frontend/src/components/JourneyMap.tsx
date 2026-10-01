@@ -126,7 +126,7 @@ function NodePanel({ node, personas, runId, close }: {
       </div>
       <div className="journey-panel-body">
         <section>
-          <h4>Observed visits</h4>
+          <h4>Steps on this page</h4>
           {!visitors.length && <p className="muted">No observation recorded on this page.</p>}
           <ul className="journey-visitors">
             {visitors.map(persona => {
@@ -135,7 +135,7 @@ function NodePanel({ node, personas, runId, close }: {
                 <li key={persona.persona_id}>
                   <PersonaSprite type={persona.persona_type} size={28} />
                   <div>
-                    <strong>{persona.label} · {plural(visits.length, "visit")}</strong>
+                    <strong>{persona.label} · {plural(visits.length, "step")}</strong>
                     <div className="journey-evidence">
                       {visits.map(visit => (
                         <Link key={visit.seq} href={`/runs/${runId}/personas/${persona.persona_id}?step=${visit.seq}`}>

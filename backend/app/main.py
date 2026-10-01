@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -44,6 +44,10 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(runs.router)
+
+    @app.get("/", include_in_schema=False)
+    async def _root():
+        return RedirectResponse("/docs")
 
     @app.exception_handler(RunNotFound)
     async def _not_found(_: Request, exc: RunNotFound):
