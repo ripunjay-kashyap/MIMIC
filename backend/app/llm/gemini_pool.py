@@ -69,6 +69,20 @@ class Pair:
         return self.day_count < self.rpd - SAFETY_MARGIN_RPD
 
 
+def _trace_inputs(inputs: dict) -> dict:
+    """Never send `self` (holds API keys) or raw screenshot bytes to tracing."""
+    img = inputs.get("image_jpeg")
+    return {
+        "task": inputs.get("task"), "prompt": inputs.get("prompt"), "system": inputs.get("system"),
+        "image_jpeg": f"<{len(img)} bytes>" if img else None, "json_output": inputs.get("json_output"),
+    }
+
+
+def _trace_outputs(output) -> dict:
+    out = output if isinstance(output, dict) else getattr(output, "__dict__", {"output": str(output)})
+    return {k: v for k, v in out.items() if k != "key_hash"}
+
+
 @dataclass
 class GeminiResult:
     text: str
@@ -131,7 +145,7 @@ class GeminiPool:
             rem[p.model] = rem.get(p.model, 0) + max(0, p.rpd - SAFETY_MARGIN_RPD - p.day_count)
         return rem
 
-    @traceable(run_type="llm", name="gemini.generate")
+    @traceable(run_type="llm", name="gemini.generate", process_inputs=_trace_inputs, process_outputs=_trace_outputs)
     async def generate(
         self, task: Task, prompt: str, *, system: str | None = None, image_jpeg: bytes | None = None,
         json_output: bool = False, max_output_tokens: int = 1024, max_wait_s: float = 20.0,
