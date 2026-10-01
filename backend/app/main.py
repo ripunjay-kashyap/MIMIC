@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from app.agent.escalation import make_escalator
+from app.analysis.synthesis import synthesize
 from app.api import health, runs
 from app.browser.guards import TargetRejected
 from app.orchestrator.run_manager import RunConflict, RunNotFound, manager
@@ -22,6 +24,8 @@ async def lifespan(app: FastAPI):
     # Launch Chromium in the background so /health answers immediately during cold start
     # (frontend shows "Initializing…" until browser_ready flips).
     browser_task = asyncio.create_task(pool.start())
+    manager.escalator_factory = lambda run_id: make_escalator(run_id, manager.buses[run_id])
+    manager.synthesizer = synthesize
     await manager.recover_orphans()
     yield
     browser_task.cancel()

@@ -35,6 +35,7 @@ DEMO_HOST = "ripun-j-kashyap--mimic-backend-web.modal.run"
         "IN_CONTAINER": "1",  # Chromium runs as root in the container -> --no-sandbox
         "ALLOW_LOCAL_TARGETS": "false",
         "DEMO_TARGET_HOSTS": DEMO_HOST,
+        "GEMINI_MODE": "real",  # visual escalation + report synthesis (dev default is fake)
     },
     cpu=1.0,  # 1 physical core = 2 vCPU
     memory=4096,

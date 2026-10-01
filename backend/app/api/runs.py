@@ -122,11 +122,14 @@ async def journey(run_id: str, persona_id: str):
     else:
         evs = await get_repo().get_events(run_id, persona_id=persona_id)
     paths = [e.payload.get("path") for e in evs if e.type == "screenshot" and e.payload.get("path")]
+    paths += [e.payload.get("screenshot_path") for e in evs if e.type == "escalation" and e.payload.get("screenshot_path")]
     urls = await get_repo().signed_urls(paths)
     out = []
     for e in evs:
         d = e.model_dump(mode="json")
         if e.type == "screenshot":
             d["payload"] = {**d["payload"], "url": urls.get(e.payload.get("path"))}
+        elif e.type == "escalation":
+            d["payload"] = {**d["payload"], "screenshot_url": urls.get(e.payload.get("screenshot_path") or "")}
         out.append(d)
     return {"persona": persona.model_dump(mode="json"), "events": out}
