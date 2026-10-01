@@ -1,3 +1,5 @@
+import { PersonaSprite, personaColors } from "./PersonaSprite";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { finished } from "@/lib/events";
 import type { PersonaState, RunEvent } from "@/lib/types";
@@ -41,12 +43,12 @@ export function PersonaCard({ persona, runId, live = false, events = [] }: Props
   ] as const;
 
   return (
-    <article className="panel persona-card" data-testid={`persona-${persona.persona_id}`}>
+    <article className="panel persona-card" data-testid={`persona-${persona.persona_id}`} style={{ "--persona-color": personaColors[persona.persona_type] } as CSSProperties}>
       <div className="card-top">
         <span className="eyebrow">{persona.device} · {persona.language}</span>
         <StatusChip status={persona.task_status} />
       </div>
-      <h2>{persona.label}</h2>
+      <div className="persona-identity"><PersonaSprite type={persona.persona_type} size={44} /><h2>{persona.label}</h2></div>
       <p className="muted blurb">{persona.blurb}</p>
       {live ? (
         <>

@@ -10,6 +10,7 @@ import type { RunSummary } from "@/lib/types";
 import { PersonaCard } from "./PersonaCard";
 import { StatusChip } from "./StatusChip";
 import { ErrorState, Loading } from "./ResourceState";
+import { MissionCounters, MissionRail, LiveTicker } from "./MissionControl";
 import { JourneyMap } from "./JourneyMap";
 
 function LoadedRun({ run }: { run: RunSummary }) {
@@ -99,6 +100,7 @@ function LoadedRun({ run }: { run: RunSummary }) {
         </div>
       )}
       {stream.pollError && <p className="error-panel" role="alert">{stream.pollError}</p>}
+      {live && <MissionCounters personas={personas} events={stream.events} />}
       <div className="journey-tabs" role="tablist" aria-label="Run view">
         {(["cards", "map"] as const).map(tab => (
           <button key={tab} id={`tab-${tab}`} role="tab" aria-selected={view === tab}
@@ -117,6 +119,8 @@ function LoadedRun({ run }: { run: RunSummary }) {
       </div>
       <div id="run-view-panel" role="tabpanel" aria-labelledby={`tab-${view}`}>
         {view === "map" ? (
+          <>
+          {live && <MissionRail personas={personas} runId={run.run_id} />}
           <JourneyMap
             events={stream.events}
             personas={personas}
@@ -124,6 +128,7 @@ function LoadedRun({ run }: { run: RunSummary }) {
             status={status}
             findings={stream.events.flatMap(event => event.type === "finding" ? [event.payload.finding] : [])}
           />
+          </>
         ) : (
           <div className="persona-grid">
             {personas.map(persona => (
@@ -138,6 +143,7 @@ function LoadedRun({ run }: { run: RunSummary }) {
           </div>
         )}
       </div>
+      {live && <LiveTicker events={stream.events} personas={personas} />}
       {live && (
         <details className="panel event-log">
           <summary>Raw event log · {stream.events.length} events received</summary>

@@ -70,3 +70,17 @@ export function subscribeMock(id: string, onEvent: (event: RunEvent) => void, on
   queueMicrotask(() => { if (!closed) { onOpen(); tick(); } });
   return close;
 }
+
+// A stable, explicitly synthetic completed run for the case-study route.
+export async function mockGoldenRun() {
+  const id = "mock-golden";
+  if (!localStorage.getItem(PREFIX + id)) {
+    write({
+      id,
+      input: { target_url: "http://localhost:8000/demo/", goal: "Choose a health insurance plan, complete onboarding, and reach the policy confirmation page.", authorized: true },
+      createdAt: "2026-10-01T08:00:00.000Z",
+      startedAt: Date.now() - 120_000,
+    });
+  }
+  return { run_id: id };
+}

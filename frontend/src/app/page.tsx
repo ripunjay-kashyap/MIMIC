@@ -1,4 +1,7 @@
 "use client";
+import Link from "next/link";
+import { PersonaSprite, personaNames, type PersonaType } from "@/components/PersonaSprite";
+import { MOCK } from "@/lib/config";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_URL, createRun } from "@/lib/api";
@@ -23,12 +26,37 @@ export default function Setup() {
       router.push(`/runs/${run.run_id}`);
     } catch (error) { setError(errorMessage(error)); setPending(false); }
   }
-  return <><div className="page-heading"><p className="eyebrow">01 / Configure a test</p><h1>Ship to synthetic users<br className="desktop-break" /> before real users.</h1><p className="lead">Give six independent personas the same goal. See where their journeys diverge, then inspect the evidence.</p></div>
+  return <>
+    <section className="setup-hero" aria-label="Synthetic usability testing">
+      <div className="page-heading">
+        <p className="eyebrow">01 / Configure a test · MIMIC × GhostQA</p>
+        <h1>Ship to synthetic users<br /><span className="hero-accent">before real users.</span></h1>
+        <p className="lead">One goal. Six independent browsers. Watch AI personas find the friction in your product — then replay the proof.</p>
+        <div className="hero-actions">
+          <Link className="button secondary" href="/case-study" prefetch={false}>
+            {MOCK ? "Watch a mock run" : "Watch a real run"} <span aria-hidden="true"> ↗</span>
+          </Link>
+          <span className="muted small">Every finding has a trail.</span>
+        </div>
+      </div>
+      <div className="swarm-display" aria-label="The six behavioral identities">
+        <div className="swarm-caption"><span>Meet your test crew</span><span>06 / identities</span></div>
+        <div className="swarm-sprites">
+          {(Object.keys(personaNames) as PersonaType[]).map(type => (
+            <figure key={type}>
+              <PersonaSprite type={type} size={48} />
+              <figcaption>{personaNames[type]}</figcaption>
+            </figure>
+          ))}
+        </div>
+        <p className="swarm-footer">Different instincts. The same task. Isolated browsers.</p>
+      </div>
+    </section>
     <div className="setup-grid"><section className="panel setup-panel"><div className="section-heading"><h2>Set up a run</h2><button type="button" className="button secondary" onClick={prefill} disabled={pending}>Prefill demo</button></div>
       <form onSubmit={submit}><label htmlFor="target">Target URL</label><input id="target" type="url" placeholder="https://your-site.example" value={target} onChange={e => setTarget(e.target.value)} required disabled={pending} />
         <label htmlFor="goal">Goal</label><textarea id="goal" rows={4} placeholder="What should each persona try to complete?" value={goal} onChange={e => setGoal(e.target.value)} required disabled={pending} />
         <fieldset disabled={pending}><legend>Success criteria <span className="muted">· optional</span></legend><label htmlFor="url-contains">Success when URL contains</label><input id="url-contains" value={urlContains} onChange={e => setUrlContains(e.target.value)} placeholder="e.g. confirmed" /><label htmlFor="text-visible">Success when text visible</label><input id="text-visible" value={textVisible} onChange={e => setTextVisible(e.target.value)} placeholder="e.g. Policy issued" /></fieldset>
         <label className="checkbox-label" htmlFor="authorized"><input id="authorized" type="checkbox" checked={authorized} onChange={e => setAuthorized(e.target.checked)} required disabled={pending} />I am authorized to test this target</label>
         {error && <p className="error-panel" role="alert">{error}</p>}<button className="button" type="submit" disabled={pending}>{pending ? "Creating run…" : "Create run"}</button>
-      </form></section><aside className="setup-aside"><p className="eyebrow">One goal. Six perspectives.</p><ol className="workflow"><li><strong>Review your cohort</strong><p>Understand each persona’s traits, limits and device before you deploy.</p></li><li><strong>Watch the journeys</strong><p>Follow decisions, progress and friction as each persona explores.</p></li><li><strong>Inspect the evidence</strong><p>Open findings and replay the exact steps behind them.</p></li></ol><p className="muted small">These are controlled behavioral simulations, not predictions about demographic groups.</p></aside></div></>;
+      </form></section><aside className="setup-aside"><p className="eyebrow">From intention to evidence</p><h2>Your next release,<br />seen six ways.</h2><ol className="workflow"><li><strong>Configure</strong><p>Understand each persona’s traits, limits and device before you deploy.</p></li><li><strong>Deploy swarm</strong><p>Follow decisions, progress and friction as each persona explores.</p></li><li><strong>Inspect the evidence</strong><p>Open findings and replay the exact steps behind them.</p></li></ol><p className="muted small">These are controlled behavioral simulations, not predictions about demographic groups.</p></aside></div></>;
 }

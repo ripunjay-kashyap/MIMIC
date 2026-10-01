@@ -24,3 +24,4 @@ export const getRun = (id: string): Promise<RunSummary> => MOCK ? mock.mockGetRu
 export const startRun = (id: string): Promise<{ run_id: string; status: "running" }> => MOCK ? mock.mockStartRun(id) : request(`${runPath(id)}/start`, { method: "POST" });
 export const getReport = (id: string): Promise<Report> => MOCK ? mock.mockGetReport(id) : request(`${runPath(id)}/report`);
 export const getJourney = (id: string, personaId: string): Promise<Journey> => MOCK ? mock.mockGetJourney(id, personaId) : request(`${runPath(id)}/personas/${encodeURIComponent(personaId)}/journey`);
+export const getGoldenRun = (): Promise<{ run_id: string }> => MOCK ? mock.mockGoldenRun() : request("/runs/golden");

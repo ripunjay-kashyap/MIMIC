@@ -1,3 +1,4 @@
+import { PersonaSprite, personaTypeFromId } from "./PersonaSprite";
 import Link from "next/link";
 import type { Finding } from "@/lib/types";
 import { findingAnchor } from "@/lib/journeyGraph";
@@ -28,7 +29,7 @@ export function FindingCard({ finding }: { finding: Finding }) {
           <h4>Evidence</h4>
           <div className="persona-chips">
             {finding.personas.map(persona => (
-              <span key={persona}>{persona.replace(/-01$/, "").replaceAll("_", " ")}</span>
+              <span key={persona}><PersonaSprite type={personaTypeFromId(persona)} size={20} />{persona.replace(/-01$/, "").replaceAll("_", " ")}</span>
             ))}
           </div>
           <ul className="evidence-links">

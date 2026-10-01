@@ -57,7 +57,7 @@ export function ReportView({ id }: { id: string }) {
       <MetricTiles metrics={data.metrics} />
       <div className="section-heading findings-title">
         <h2>Findings</h2>
-        <span className="muted">{data.findings.length} findings · highest severity first</span>
+        <span className="muted">{data.findings.length} {data.findings.length === 1 ? "finding" : "findings"} · highest severity first</span>
       </div>
       {!data.findings.length ? (
         <p className="panel">No findings were recorded for this run.</p>

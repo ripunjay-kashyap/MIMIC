@@ -3,17 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  buildJourneyGraph, findingAnchor, personaNodeSequence,
+  buildJourneyGraph, findingAnchor, personaNodeSequence, plural, visitLabel,
   type JourneyGraph, type JourneyNode,
 } from "@/lib/journeyGraph";
 import type { Finding, PersonaState, RunEvent, RunStatus, TaskStatus } from "@/lib/types";
 
-// Okabe–Ito colors, fixed by behavioral type rather than arrival order.
-const colors: Record<PersonaState["persona_type"], string> = {
-  impatient: "#D55E00", low_literacy: "#0072B2", power: "#009E73",
-  cautious: "#CC79A7", explorer: "#E69F00", chaos: "#56B4E9",
-};
-const severityColors = { high: "#b94145", medium: "#b77918", low: "#7c8795" };
+import { PersonaSprite, PixelGlyph, personaColors as colors } from "./PersonaSprite";
+const severityColors = { high: "#ff929d", medium: "#f5d472", low: "#a2b3c6" };
 const emptyFindings: Finding[] = [];
 const statusIcon = (status: TaskStatus) => status === "success" ? "✓"
   : status === "abandoned" || status === "failed" ? "✗"
@@ -38,6 +34,7 @@ function LiveDot({ graph, persona, index, color, opacity }: {
   graph: JourneyGraph; persona: PersonaState; index: number; color: string; opacity: number;
 }) {
   const dot = useRef<SVGCircleElement>(null);
+  const sprite = useRef<SVGGElement>(null);
   const seen = useRef<number | null>(null);
   const transition = graph.transitions.findLast(t => t.persona_id === persona.persona_id);
   const current = graph.nodes.find(node => node.path === graph.current[persona.persona_id]);
@@ -55,6 +52,7 @@ function LiveDot({ graph, persona, index, color, opacity }: {
     function place(x: number, y: number) {
       circle.setAttribute("cx", String(x));
       circle.setAttribute("cy", String(y));
+      sprite.current?.setAttribute("transform", `translate(${x - 10} ${y - 10}) scale(1.25)`);
     }
     const restingY = current.y + 43 + index * 3;
     if (!animate || reducedMotion) {
@@ -82,10 +80,10 @@ function LiveDot({ graph, persona, index, color, opacity }: {
 
   if (!current) return null;
   return (
-    <circle ref={dot} className="journey-dot" data-persona={persona.persona_id}
-      r={7} fill={color} stroke="white" strokeWidth={2} opacity={opacity}>
+    <g opacity={opacity}><circle ref={dot} className="journey-dot" data-persona={persona.persona_id}
+      r={12} fill={color} fillOpacity={.12} stroke={color} strokeWidth={1}>
       <title>{persona.label} · {current.label}</title>
-    </circle>
+    </circle><g ref={sprite} aria-hidden="true"><PixelGlyph type={persona.persona_type} /></g></g>
   );
 }
 
@@ -107,7 +105,7 @@ function NodePanel({ node, personas, runId, close }: {
           const visits = node.visits.filter(v => v.persona_id === persona.persona_id);
           return (
             <li key={persona.persona_id}>
-              <strong>{persona.label} · {visits.length} visits</strong>
+              <strong>{persona.label} · {plural(visits.length, "visit")}</strong>
               <div className="journey-evidence">
                 {visits.map(visit => (
                   <Link key={visit.seq} href={`/runs/${runId}/personas/${persona.persona_id}?step=${visit.seq}`}>
@@ -161,6 +159,7 @@ function MapContent({ graph, personas, runId, status }: {
           <button key={persona.persona_id} type="button" aria-pressed={selectedPersona === persona.persona_id}
             onClick={() => setSelectedPersona(selectedPersona === persona.persona_id ? null : persona.persona_id)}
             style={{ borderColor: colors[persona.persona_type], opacity: opacity(persona.persona_id) }}>
+            <PersonaSprite type={persona.persona_type} size={24} />
             <span style={{ color: colors[persona.persona_type] }} aria-hidden="true">{statusIcon(persona.task_status)}</span>
             {persona.label}
             <span className="journey-chip-status">{statusLabel(persona.task_status)}</span>
@@ -196,7 +195,7 @@ function MapContent({ graph, personas, runId, status }: {
               const success = ends.some(end => end.status === "success");
               return (
                 <g key={node.path} className="journey-node" data-path={node.path} transform={`translate(${node.x} ${node.y})`}
-                  role="button" tabIndex={0} aria-label={`${node.label}, ${node.visits.length} visits, ${node.friction?.count || 0} ${node.friction?.count === 1 ? "finding" : "findings"}`}
+                  role="button" tabIndex={0} aria-label={`${node.label}, ${visitLabel(graph, node)}, ${node.friction?.count || 0} ${node.friction?.count === 1 ? "finding" : "findings"}`}
                   aria-pressed={selectedPath === node.path} onClick={() => setSelectedPath(node.path)}
                   onKeyDown={event => {
                     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedPath(node.path); }
@@ -207,11 +206,11 @@ function MapContent({ graph, personas, runId, status }: {
                       fill="none" stroke={severityColors[node.friction.severity]} strokeWidth={3} />
                   )}
                   <rect x={-70} y={-31} width={140} height={62} rx={9} fill="white"
-                    stroke={success ? "#46977a" : selectedPath === node.path ? "#294e9c" : "#becbd9"} strokeWidth={success ? 2.5 : 1.5} />
+                    stroke={success ? "#72f0be" : selectedPath === node.path ? "#87bfff" : "#48617a"} strokeWidth={success ? 2.5 : 1.5} />
                   <text textAnchor="middle" y={-5} className="journey-node-label">
                     {node.label.length > 19 ? `${node.label.slice(0, 18)}…` : node.label}
                   </text>
-                  <text textAnchor="middle" y={17} className="journey-node-visits">{node.visits.length} visits</text>
+                  <text textAnchor="middle" y={17} className="journey-node-visits">{visitLabel(graph, node)}</text>
                   {node.friction && (
                     <g transform="translate(0 -51)">
                       <rect x={-46} y={-13} width={92} height={23} rx={6} fill="white" stroke={severityColors[node.friction.severity]} />

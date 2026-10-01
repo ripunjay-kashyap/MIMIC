@@ -135,7 +135,8 @@ export function buildJourneyGraph(events: RunEvent[], personas: PersonaState[], 
     }
     if (event.type === "persona_finished") {
       graph.ends = graph.ends.filter(end => end.persona_id !== pid);
-      graph.ends.push({ persona_id: pid, status: event.payload.status, node: observed.get(pid) ?? null });
+      // Where the persona actually stopped: a final navigation (e.g. to the success page) has no later observation.
+      graph.ends.push({ persona_id: pid, status: event.payload.status, node: graph.current[pid] ?? observed.get(pid) ?? null });
     }
   }
   for (const finding of findings) {
@@ -186,4 +187,15 @@ export function findingAnchor(finding: Finding): string {
   const key = finding.id || JSON.stringify([finding.category, finding.page, finding.evidence, finding.observed]);
   // Avoid percent escapes in DOM IDs: browsers decode them when following fragment links.
   return `finding-${Array.from(key, char => /[a-zA-Z0-9-]/.test(char) ? char : `_${char.codePointAt(0)!.toString(16)}_`).join("")}`;
+}
+
+export function plural(count: number, word: string) {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
+
+/** Observed visits; a page that was reached but never observed (e.g. a terminal success page) shows its arrivals. */
+export function visitLabel(graph: JourneyGraph, node: JourneyNode) {
+  if (node.visits.length) return plural(node.visits.length, "visit");
+  const arrivals = new Set(graph.transitions.filter(t => t.to === node.path).map(t => t.persona_id)).size;
+  return arrivals ? `reached by ${arrivals}` : plural(0, "visit");
 }
