@@ -188,8 +188,7 @@ def detect_dead_end(events: list[RunEvent]) -> list[Signal]:
                 page, attempts = _page(result), []
             elif action not in {"back", "done", "give_up"}:
                 attempts.append(result)
-        elif event.type == "persona_finished" and len(attempts) >= 2:
-            signals.append(_signal("dead_end", [*attempts, event], page, reason="terminated_without_navigation"))
+    # Terminating on a page is an abandon_point, not a dead end (avoids double-reporting).
     return signals
 
 

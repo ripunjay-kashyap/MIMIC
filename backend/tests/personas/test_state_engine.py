@@ -187,7 +187,7 @@ def test_input_state_not_mutated():
 # ---------------------------------------------------------------- divergence on the same failure sequence
 
 def test_same_failures_produce_different_terminations():
-    failing = [step("click", page_changed=False, hash_after="same", path_before="/demo/verify.html") for _ in range(15)]
+    failing = [step("click", page_changed=False, hash_after="same", path_before="/demo/verify.html") for _ in range(20)]
     ends = {}
     for ptype in ["impatient", "low_literacy", "power", "cautious", "explorer", "chaos"]:
         p, outs = run(persona(ptype), *failing)
@@ -249,7 +249,7 @@ def test_cohort_shape_and_model_pinning():
                                               ["impatient", "low_literacy", "power", "cautious", "explorer", "chaos"]]
     models = [p.llm_model for p in cohort]
     assert all(models.count(m) == 2 for m in set(models))
-    assert all(p.max_actions <= 15 and p.task_status == "pending" for p in cohort)
+    assert all(p.max_actions <= 20 and p.task_status == "pending" for p in cohort)
     assert any(p.device == "mobile" for p in cohort)
 
 

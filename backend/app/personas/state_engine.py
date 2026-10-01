@@ -170,3 +170,9 @@ def mark_error(state: PersonaState, reason: str) -> PersonaState:
     s = state.model_copy(deep=True)
     s.task_status, s.termination_reason = "error", reason[:300]
     return s
+
+
+def mark_blocked(state: PersonaState, reason: str) -> PersonaState:
+    s = state.model_copy(deep=True)
+    s.task_status, s.termination_reason = "blocked_by_verification", reason[:300]
+    return s

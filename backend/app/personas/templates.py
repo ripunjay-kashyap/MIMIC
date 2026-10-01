@@ -21,7 +21,7 @@ class PersonaTemplate:
     test_identity: dict
 
 
-HARD_MAX_ACTIONS = 15
+HARD_MAX_ACTIONS = 20  # demo happy path needs ~13 actions (4 form fields + OTP)
 
 TEMPLATES: list[PersonaTemplate] = [
     PersonaTemplate(
@@ -33,7 +33,7 @@ TEMPLATES: list[PersonaTemplate] = [
             "You give up quickly when things go wrong."
         ),
         digital_literacy=0.7, patience=0.15, risk_tolerance=0.5, reading_tolerance=0.2, exploration=0.1,
-        max_actions=8, max_failed_attempts=2, abandon_frustration=0.55, device="mobile",
+        max_actions=13, max_failed_attempts=2, abandon_frustration=0.55, device="mobile",
         test_identity={"name": "Rohan Mehta", "mobile": "9876543210", "pin": "400001", "dob": "12/03/1994"},
     ),
     PersonaTemplate(
@@ -45,7 +45,7 @@ TEMPLATES: list[PersonaTemplate] = [
             "If you're unsure where you are, you go back."
         ),
         digital_literacy=0.25, patience=0.6, risk_tolerance=0.3, reading_tolerance=0.5, exploration=0.2,
-        max_actions=12, max_failed_attempts=3, abandon_frustration=0.8, device="mobile",
+        max_actions=18, max_failed_attempts=3, abandon_frustration=0.8, device="mobile",
         test_identity={"name": "Sunita Devi", "mobile": "9123456780", "pin": "800001", "dob": "05/11/1978"},
     ),
     PersonaTemplate(
@@ -56,7 +56,7 @@ TEMPLATES: list[PersonaTemplate] = [
             "fill forms correctly the first time, and never read marketing text."
         ),
         digital_literacy=0.95, patience=0.4, risk_tolerance=0.6, reading_tolerance=0.1, exploration=0.0,
-        max_actions=10, max_failed_attempts=2, abandon_frustration=0.7, device="desktop",
+        max_actions=16, max_failed_attempts=2, abandon_frustration=0.7, device="desktop",
         test_identity={"name": "Arjun Rao", "mobile": "9988776655", "pin": "560001", "dob": "21/07/1990"},
     ),
     PersonaTemplate(
@@ -68,7 +68,7 @@ TEMPLATES: list[PersonaTemplate] = [
             "payment buttons make you uneasy and you may leave."
         ),
         digital_literacy=0.6, patience=0.6, risk_tolerance=0.15, reading_tolerance=0.9, exploration=0.3,
-        max_actions=12, max_failed_attempts=2, abandon_frustration=0.75, device="desktop",
+        max_actions=18, max_failed_attempts=2, abandon_frustration=0.75, device="desktop",
         test_identity={"name": "Meera Iyer", "mobile": "9445566778", "pin": "600004", "dob": "30/01/1985"},
     ),
     PersonaTemplate(
@@ -79,7 +79,7 @@ TEMPLATES: list[PersonaTemplate] = [
             "'Explore' or 'Learn', and come back if they don't help. You eventually try to finish the goal."
         ),
         digital_literacy=0.75, patience=0.8, risk_tolerance=0.5, reading_tolerance=0.7, exploration=0.9,
-        max_actions=14, max_failed_attempts=3, abandon_frustration=0.85, device="desktop",
+        max_actions=20, max_failed_attempts=3, abandon_frustration=0.85, device="desktop",
         test_identity={"name": "Kabir Singh", "mobile": "9012345678", "pin": "110001", "dob": "09/09/1992"},
     ),
     PersonaTemplate(
@@ -90,7 +90,7 @@ TEMPLATES: list[PersonaTemplate] = [
             "doing things out of order. You still try to reach the goal. You never attempt hacking or security attacks."
         ),
         digital_literacy=0.8, patience=0.5, risk_tolerance=0.9, reading_tolerance=0.2, exploration=0.6,
-        max_actions=14, max_failed_attempts=4, abandon_frustration=0.9, device="desktop",
+        max_actions=20, max_failed_attempts=4, abandon_frustration=0.9, device="desktop",
         test_identity={"name": "Zoya Khan", "mobile": "9090909090", "pin": "700001", "dob": "14/02/1996"},
     ),
 ]

@@ -12,6 +12,7 @@ from app.models.schemas import ActionResult, AgentAction
 ACTION_TIMEOUT_MS = 5000
 SETTLE_MS = 300
 WAIT_MS = 2000
+CLICK_GRACE_MS = 1500
 
 _SIG_JS = "() => location.href + '|' + (document.body ? document.body.innerText.length + ':' + document.body.innerText.slice(0, 2000) : '')"
 
@@ -90,8 +91,17 @@ async def execute(session: PersonaSession, action: AgentAction, *, double_click:
     if len(session.blocked_navigations) > blocked_before and error is None:
         error = "offsite_navigation_blocked"
 
-    url_after = page.url
     sig_after = await _signature(session)
+    if action.action == "click" and error is None and page.url == url_before and sig_after == sig_before:
+        # Humans pause briefly after a click that shows nothing; catch short delayed redirects (e.g. payment).
+        try:
+            await page.wait_for_url(lambda u: u != url_before, timeout=CLICK_GRACE_MS)
+            await _settle(session)
+        except (PlaywrightTimeout, PlaywrightError):
+            pass
+        sig_after = await _signature(session)
+
+    url_after = page.url
     return ActionResult(
         ok=error is None,
         error=error,

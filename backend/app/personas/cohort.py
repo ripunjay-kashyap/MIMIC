@@ -15,10 +15,21 @@ def persona_id_for(persona_type: str) -> str:
     return f"{persona_type.replace('_', '-')}-01"
 
 
+# Persona groups sharing one pinned decision model (2 per model -> 3 independent rate limits).
+MODEL_GROUPS = [("power", "impatient"), ("cautious", "chaos"), ("low_literacy", "explorer")]
+
+
+def _model_for(persona_type: str) -> str:
+    models = get_settings().decision_models or ["fake"]
+    for i, group in enumerate(MODEL_GROUPS):
+        if persona_type in group:
+            return models[i % len(models)]
+    return models[0]
+
+
 def generate_cohort(goal: str) -> list[PersonaState]:
-    models = get_settings().groq_models or ["fake"]
     cohort = []
-    for i, t in enumerate(TEMPLATES):
+    for t in TEMPLATES:
         cohort.append(PersonaState(
             persona_id=persona_id_for(t.persona_type),
             persona_type=t.persona_type,
@@ -31,7 +42,7 @@ def generate_cohort(goal: str) -> list[PersonaState]:
             reading_tolerance=t.reading_tolerance,
             exploration=t.exploration,
             device=t.device,
-            llm_model=models[(i // 2) % len(models)],  # 2 personas pinned per Groq model
+            llm_model=_model_for(t.persona_type),
             max_actions=min(t.max_actions, HARD_MAX_ACTIONS),
             max_failed_attempts=t.max_failed_attempts,
             abandon_frustration=t.abandon_frustration,

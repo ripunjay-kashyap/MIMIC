@@ -67,7 +67,7 @@ async def test_learn_page_has_no_elements(pool, demo_site_url):
         await s.goto_start()
         obs = await s.observe()
         assert obs.elements == []
-        assert "(no interactive elements)" in obs.to_prompt()
+        assert "(no interactive elements on this page" in obs.to_prompt()
         assert "…(more text below)" in obs.to_prompt()  # long article is truncated
 
 

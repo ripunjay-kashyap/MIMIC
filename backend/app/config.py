@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -29,6 +30,12 @@ class Settings(BaseSettings):
     gemini_models: CsvList = Field(
         default_factory=lambda: ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash-lite"]
     )
+    # Pinned decision model per persona group (bake-off 2026-10-01): [power+impatient, cautious+chaos, low_literacy+explorer]
+    decision_models: CsvList = Field(
+        default_factory=lambda: ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "gemini-3.5-flash-lite"]
+    )
+    groq_rpm: float = 30
+    groq_tpm: float = 8000
     llm_mode: Literal["real", "fake"] = "real"
     gemini_mode: Literal["real", "fake"] = "fake"
 
@@ -47,7 +54,7 @@ class Settings(BaseSettings):
     browser_headless: bool = True
 
     @field_validator(
-        "groq_models", "gemini_api_keys", "gemini_models", "cors_origins",
+        "groq_models", "decision_models", "gemini_api_keys", "gemini_models", "cors_origins",
         "allowed_target_hosts", "demo_target_hosts", mode="before",
     )
     @classmethod
@@ -56,6 +63,17 @@ class Settings(BaseSettings):
             return [x.strip() for x in v.split(",") if x.strip()]
         return v
 
+    # LangSmith (optional). pydantic-settings doesn't export .env to os.environ, so we do it for the SDK.
+    langsmith_tracing: bool = False
+    langsmith_api_key: str = ""
+    langsmith_project: str = "mimic"
+
+    def export_tracing_env(self) -> None:
+        if self.langsmith_tracing and self.langsmith_api_key:
+            os.environ.setdefault("LANGSMITH_TRACING", "true")
+            os.environ.setdefault("LANGSMITH_API_KEY", self.langsmith_api_key)
+            os.environ.setdefault("LANGSMITH_PROJECT", self.langsmith_project)
+
     @property
     def supabase_enabled(self) -> bool:
         return bool(self.supabase_url and self.supabase_service_role_key)
@@ -63,4 +81,6 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    settings = Settings()
+    settings.export_tracing_env()
+    return settings

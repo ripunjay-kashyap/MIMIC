@@ -4,7 +4,7 @@
     "page": "index.html",
     "category": "ambiguous_cta",
     "detectable_by": "text",
-    "description": "Three similarly worded CTAs ('Get Started', 'Get a Quote', 'Explore Plans') plus a header 'Plans' link that leads to a comparison page with no purchase action; only 'Get a Quote' leads to purchase.",
+    "description": "Three similarly worded CTAs ('Get Started' -> article dead end, 'Get a Quote' -> purchase, 'Explore Plans' -> comparison with no buy action); only 'Get a Quote' leads to purchase.",
     "expected_signals": [
       "backtrack",
       "long_path",

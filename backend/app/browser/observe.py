@@ -137,7 +137,7 @@ class Observation:
         lines.append("ELEMENTS:")
         lines.extend(e.render() for e in els)
         if not els:
-            lines.append("(no interactive elements)")
+            lines.append("(no interactive elements on this page; you can still scroll or go back)")
         return "\n".join(lines)
 
     def summary(self) -> str:
